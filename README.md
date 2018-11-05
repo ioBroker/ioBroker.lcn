@@ -8,7 +8,7 @@
 [![NPM](https://nodei.co/npm/iobroker.lcn.png?downloads=true)](https://nodei.co/npm/iobroker.lcn/)
 
 
-This adapter allows to connect LCN to ioBroker.
+This adapter allows to connect Local Control Network [LCN](https://www.lcn.eu/) to ioBroker.
 
 ## Changelog
 
