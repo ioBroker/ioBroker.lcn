@@ -10,8 +10,13 @@
 This adapter allows to connect Local Control Network [LCN](https://www.lcn.eu/) to ioBroker.
 
 ## Supported Gateways
-- LCN-PKE ![pke](img/lcn-pke.png)
-- LCN-PKU with LCN-PCHK ![pke](img/lcn-pku.png)
+- LCN-PKE
+
+![pke](img/lcn-pke.png)
+
+- LCN-PKU with LCN-PCHK
+
+![pke](img/lcn-pku.png)
 
 **Don't forget, that ioBroker.lcn will block one LCN Connection License.**
 
