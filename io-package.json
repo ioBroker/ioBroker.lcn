@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.1.0",
+        "version":                  "0.3.0",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,18 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.1.0": {
+            "0.3.0": {
+              "en": "Support of variables was added.",
+              "de": "Unterstützung von Variablen wurde hinzugefügt.",
+              "ru": "Добавлена ​​поддержка переменных.",
+              "pt": "Suporte de variáveis ​​foi adicionado.",
+              "nl": "Ondersteuning van variabelen is toegevoegd.",
+              "fr": "Le support des variables a été ajouté.",
+              "it": "È stato aggiunto il supporto delle variabili.",
+              "es": "Se agregó soporte de variables.",
+              "pl": "Obsługa zmiennych została dodana."
+            },
+            "0.2.1": {
               "en": "Big changes",
               "de": "Große veränderungen",
               "ru": "Большие изменения",
