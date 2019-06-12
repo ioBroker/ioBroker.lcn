@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.4.1",
+        "version":                  "0.4.2",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,7 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.4.1": {
+            "0.4.2": {
               "en": "Support of old measure values was added.",
               "ru": "Добавлена ​​поддержка старых значений показателей.",
               "de": "Unterstützung alter Messwerte wurde hinzugefügt.",

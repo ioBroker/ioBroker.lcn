@@ -40,12 +40,17 @@ To apply the valid convert functions to variables, the variables must have the v
 - **value.sun.azimuth** - sun azimuth
 - **value.sun.elevation** - sun elevation
 
+## How to use
+After the first start the devices must be scanned. It can be done in the configuration dialog with scan button
+
+![scan](img/scanButton.png)
+
 ## ToDO
 - Configuration dialog to define type of variables.
 
 ## Changelog
 
-### 0.4.1 (2019-06-12)
+### 0.4.2 (2019-06-12)
 * (bluefox) Support of old measure values was added
 
 ### 0.3.2 (2018-11-19)
@@ -57,6 +62,6 @@ To apply the valid convert functions to variables, the variables must have the v
 ## License
 CC-BY-NC-4.0
 
-Copyright (c) 2018 bluefox <dogafox@gmail.com>
+Copyright (c) 2018-2019 bluefox <dogafox@gmail.com>
 
 Up to 10 devices can be connected for free. If you need more devices, you must buy a commercial license.
