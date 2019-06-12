@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.3.0",
+        "version":                  "0.4.1",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,19 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.3.0": {
+            "0.4.1": {
+              "en": "Support of old measure values was added.",
+              "ru": "Добавлена ​​поддержка старых значений показателей.",
+              "de": "Unterstützung alter Messwerte wurde hinzugefügt.",
+              "es": "Se añadió soporte de valores de medida antiguos.",
+              "it": "È stato aggiunto il supporto dei vecchi valori di misura.",
+              "nl": "Ondersteuning van oude meetwaarden is toegevoegd.",
+              "fr": "Le support des anciennes valeurs de mesure a été ajouté.",
+              "pl": "Dodano obsługę starych wartości miar.",
+              "zh-cn": "增加了对旧测量值的支持。",
+              "pt": "Suporte de valores de medida antigos foi adicionado."
+            },
+            "0.3.2": {
               "en": "Support of variables was added.",
               "de": "Unterstützung von Variablen wurde hinzugefügt.",
               "ru": "Добавлена ​​поддержка переменных.",
@@ -32,13 +44,13 @@
               "pl": "Duże zmiany"
             }
         },
-	    "license":                  "CC-BY-NC-4.0",
         "platform":                 "Javascript/Node.js",
         "mode":                     "daemon",
         "icon":                     "lcn.png",
         "enabled":                  false,
         "materialize":              true,
         "messagebox":               true,
+        "compact":                  true,
 	    "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/admin/lcn.png",
 	    "keywords":                 ["LCN"],
         "readme":                   "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
