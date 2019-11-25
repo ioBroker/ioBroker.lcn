@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lcn",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "ioBroker LCN Adapter",
   "author": {
     "name": "bluefox",
@@ -26,17 +26,18 @@
     "jsonwebtoken": "^8.4.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "mocha": "^5.2.0",
-    "chai": "^4.1.2",
-    "del": "^3.0.0",
-    "gulp-javascript-obfuscator": "^1.1.4",
+    "gulp": "^4.0.2",
+    "mocha": "^6.2.2",
+    "chai": "^4.2.0",
+    "del": "^5.1.0",
+    "gulp-javascript-obfuscator": "^1.1.6",
+    "@babel/preset-env": "^7.7.4",
     "babel-core": "^6.26.3",
-    "babel-minify": "^0.4.3",
+    "babel-minify": "^0.5.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
-    "babelify": "^8.0.0",
-    "browserify": "^16.2.2",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.0",
     "vinyl-source-stream": "^2.0.0"
   },
   "main": "lcn.js",

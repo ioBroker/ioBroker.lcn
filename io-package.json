@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.4.2",
+        "version":                  "0.4.3",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,6 +9,18 @@
            "ru": "LCN"
 	    },
         "news": {
+            "0.4.3": {
+              "en": "Fixed error by parsing of acknowledgement",
+              "de": "Fehler beim Analysieren der Bestätigung behoben",
+              "ru": "Исправлена ошибка при разборе подтверждения",
+              "pt": "Corrigido erro ao analisar a confirmação",
+              "nl": "Fout verholpen door ontleden van bevestiging",
+              "fr": "Correction d'une erreur en analysant l'accusé de réception",
+              "it": "Risolto errore analizzando il riconoscimento",
+              "es": "Se corrigió el error al analizar el acuse de recibo",
+              "pl": "Naprawiono błąd przez analizowanie potwierdzenia",
+              "zh-cn": "通过解析确认修复错误"
+            },
             "0.4.2": {
               "en": "Support of old measure values was added.",
               "ru": "Добавлена ​​поддержка старых значений показателей.",
