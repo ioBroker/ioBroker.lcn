@@ -50,7 +50,7 @@ After the first start the devices must be scanned. It can be done in the configu
 
 ## Changelog
 
-### 0.4.3 (2019-11-25)
+### 0.4.4 (2019-11-26)
 * (bluefox) Fixed error by parsing of acknowledgement
 
 ### 0.4.2 (2019-06-12)

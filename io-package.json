@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.4.3",
+        "version":                  "0.4.4",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,7 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.4.3": {
+            "0.4.4": {
               "en": "Fixed error by parsing of acknowledgement",
               "de": "Fehler beim Analysieren der Bestätigung behoben",
               "ru": "Исправлена ошибка при разборе подтверждения",
