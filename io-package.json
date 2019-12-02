@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.5.0",
+        "version":                  "0.5.1",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,7 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.5.0": {
+            "0.5.1": {
               "en": "Finger scanner supported\nAdded possibility to set the analog mode\nRelay outputs are supported now",
               "de": "Fingerscanner unterstützt\nMöglichkeit zum Einstellen des Analogmodus hinzugefügt\nRelaisausgänge werden jetzt unterstützt",
               "ru": "Сканер отпечатков пальцев поддерживается\nДобавлена возможность настройки аналогового режима\nРелейные выходы теперь поддерживаются",
