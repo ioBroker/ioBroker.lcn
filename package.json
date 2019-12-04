@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lcn",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "ioBroker LCN Adapter",
   "author": {
     "name": "bluefox",
@@ -23,7 +23,8 @@
     "url": "https://github.com/ioBroker/ioBroker.lcn"
   },
   "dependencies": {
-    "jsonwebtoken": "^8.4.0"
+    "jsonwebtoken": "^8.4.0",
+    "@iobroker/adapter-core": "^1.0.3"
   },
   "devDependencies": {
     "gulp": "^4.0.2",

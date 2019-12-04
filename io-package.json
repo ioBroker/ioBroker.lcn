@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.5.1",
+        "version":                  "0.5.3",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,6 +9,18 @@
            "ru": "LCN"
 	    },
         "news": {
+            "0.5.3": {
+              "en": "Connection indication was corrected",
+              "de": "Verbindungsanzeige wurde korrigiert",
+              "ru": "Индикация подключения была исправлена",
+              "pt": "A indicação de conexão foi corrigida",
+              "nl": "Verbindingsindicatie is gecorrigeerd",
+              "fr": "L'indication de connexion a été corrigée",
+              "it": "L'indicazione di connessione è stata corretta",
+              "es": "Se corrigió la indicación de conexión",
+              "pl": "Wskazanie połączenia zostało poprawione",
+              "zh-cn": "连接指示已更正"
+            },
             "0.5.1": {
               "en": "Finger scanner supported\nAdded possibility to set the analog mode\nRelay outputs are supported now",
               "de": "Fingerscanner unterstützt\nMöglichkeit zum Einstellen des Analogmodus hinzugefügt\nRelaisausgänge werden jetzt unterstützt",
