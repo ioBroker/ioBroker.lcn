@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.5.3",
+        "version":                  "0.5.5",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,7 +9,19 @@
            "ru": "LCN"
 	    },
         "news": {
-            "0.5.3": {
+            "0.5.5": {
+              "en": "Relay inputs were corrected",
+              "de": "Relaiseingänge wurden korrigiert",
+              "ru": "Входы реле были исправлены",
+              "pt": "As entradas do relé foram corrigidas",
+              "nl": "Relais-ingangen zijn gecorrigeerd",
+              "fr": "Les entrées de relais ont été corrigées",
+              "it": "Gli ingressi del relè sono stati corretti",
+              "es": "Las entradas de relé fueron corregidas",
+              "pl": "Wejścia przekaźnikowe zostały skorygowane",
+              "zh-cn": "继电器输入已更正"
+            },
+            "0.5.4": {
               "en": "Connection indication was corrected",
               "de": "Verbindungsanzeige wurde korrigiert",
               "ru": "Индикация подключения была исправлена",
