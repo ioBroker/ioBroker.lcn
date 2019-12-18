@@ -1,7 +1,7 @@
 {
     "common": {
         "name":                     "lcn",
-        "version":                  "0.5.5",
+        "version":                  "0.6.3",
         "title":                    "LCN connection",
         "desc":                     {
            "en": "LCN",
@@ -9,6 +9,30 @@
            "ru": "LCN"
 	    },
         "news": {
+            "0.6.3": {
+              "en": " General relays mode was implemented",
+              "de": " Der allgemeine Relaismodus wurde implementiert",
+              "ru": " Реализован режим общих реле",
+              "pt": " O modo de relés gerais foi implementado",
+              "nl": " Algemene relaismodus is geïmplementeerd",
+              "fr": " Le mode relais général a été implémenté",
+              "it": " È stata implementata la modalità relè generale",
+              "es": " Se implementó el modo de relés generales",
+              "pl": " Zaimplementowano ogólny tryb przekaźników",
+              "zh-cn": " 实施通用继电器模式"
+            },
+            "0.6.2": {
+              "en": "Detected delayed responses\nDynamical creation of states is implemented",
+              "de": "Verspätete Antworten festgestellt\nDas dynamische Erzeugen von Zuständen ist implementiert",
+              "ru": "Обнаружены задержанные ответы\nДинамическое создание состояний реализовано",
+              "pt": "Respostas atrasadas detectadas\nCriação dinâmica de estados é implementada",
+              "nl": "Vertraagde antwoorden gedetecteerd\nDynamische creatie van staten is geïmplementeerd",
+              "fr": "Réponses retardées détectées\nLa création dynamique d'états est mise en œuvre",
+              "it": "Rilevate risposte ritardate\nViene implementata la creazione dinamica di stati",
+              "es": "Respuestas tardías detectadas\nSe implementa la creación dinámica de estados.",
+              "pl": "Wykryte opóźnione odpowiedzi\nRealizowane jest dynamiczne tworzenie stanów",
+              "zh-cn": "检测到延迟响应\n动态创建状态"
+            },
             "0.5.5": {
               "en": "Relay inputs were corrected",
               "de": "Relaiseingänge wurden korrigiert",
@@ -111,6 +135,7 @@
       "host":                 "127.0.0.1",
       "analogMode":           1,
       "reconnectTimeout":     30,
+      "connectTimeout":       6000,
       "defaultTimeout":       1000,
       "pingInterval":         300,
       "pingTimeout":          1000,
@@ -118,7 +143,8 @@
       "password":             "",
       "debug":                false,
       "license":              "",
-      "readAtStart":          true
+      "readAtStart":          true,
+      "combinedRelays":       true
     },
     "objects": [
 

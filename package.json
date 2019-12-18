@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lcn",
-  "version": "0.5.5",
+  "version": "0.6.3",
   "description": "ioBroker LCN Adapter",
   "author": {
     "name": "bluefox",
