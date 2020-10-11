@@ -90,7 +90,7 @@ After the first start the devices must be scanned. It can be done in the configu
 	### __WORK IN PROGRESS__
 -->
 ## Changelog
-### 1.0.1 (2020-10-10)
+### 1.0.2 (2020-10-11)
 * (bluefox) Implemented the regulators and the display support.
 
 ### 0.6.3 (2019-12-18)

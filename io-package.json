@@ -7,9 +7,9 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "1.0.1",
+    "version": "1.0.2",
     "news": {
-      "1.0.1": {
+      "1.0.2": {
         "en": "Implemented the regulators and the display support.",
         "de": "Implementierte die Regler und die Display-Unterstützung.",
         "ru": "Реализованы регуляторы и поддержка дисплея.",
