@@ -1,333 +1,344 @@
 {
-  "common": {
-    "name": "lcn",
-    "title": "LCN connection",
-    "desc": {
-      "en": "LCN",
-      "de": "LCN",
-      "ru": "LCN"
+    "common": {
+        "name": "lcn",
+        "title": "LCN connection",
+        "desc": {
+            "en": "LCN",
+            "de": "LCN",
+            "ru": "LCN"
+        },
+        "version": "1.0.3",
+        "news": {
+            "1.0.3": {
+                "en": "Changed the calculation of the temperature variables",
+                "de": "Die Berechnung der Temperaturvariablen wurde geändert",
+                "ru": "Изменен расчет температурных переменных.",
+                "pt": "Alterou o cálculo das variáveis de temperatura",
+                "nl": "De berekening van de temperatuurvariabelen gewijzigd",
+                "fr": "Changement du calcul des variables de température",
+                "it": "Modificato il calcolo delle variabili di temperatura",
+                "es": "Se modificó el cálculo de las variables de temperatura.",
+                "pl": "Zmieniono obliczenia zmiennych temperatury",
+                "zh-cn": "更改了温度变量的计算"
+            },
+            "1.0.2": {
+                "en": "Implemented the regulators and the display support.",
+                "de": "Implementierte die Regler und die Display-Unterstützung.",
+                "ru": "Реализованы регуляторы и поддержка дисплея.",
+                "pt": "Implementei os reguladores e o suporte do display.",
+                "nl": "Implementeerde de toezichthouders en de display-ondersteuning.",
+                "fr": "Implémentation des régulateurs et du support d'affichage.",
+                "it": "Implementati i regolatori e il supporto display.",
+                "es": "Implementado los reguladores y el soporte de visualización.",
+                "pl": "Wdrożono regulatory i obsługę wyświetlacza.",
+                "zh-cn": "实施监管机构和显示支持。"
+            },
+            "0.6.3": {
+                "en": " General relays mode was implemented",
+                "de": " Der allgemeine Relaismodus wurde implementiert",
+                "ru": " Реализован режим общих реле",
+                "pt": " O modo de relés gerais foi implementado",
+                "nl": " Algemene relaismodus is geïmplementeerd",
+                "fr": " Le mode relais général a été implémenté",
+                "it": " È stata implementata la modalità relè generale",
+                "es": " Se implementó el modo de relés generales",
+                "pl": " Zaimplementowano ogólny tryb przekaźników",
+                "zh-cn": " 实施通用继电器模式"
+            },
+            "0.6.2": {
+                "en": "Detected delayed responses\nDynamical creation of states is implemented",
+                "de": "Verspätete Antworten festgestellt\nDas dynamische Erzeugen von Zuständen ist implementiert",
+                "ru": "Обнаружены задержанные ответы\nДинамическое создание состояний реализовано",
+                "pt": "Respostas atrasadas detectadas\nCriação dinâmica de estados é implementada",
+                "nl": "Vertraagde antwoorden gedetecteerd\nDynamische creatie van staten is geïmplementeerd",
+                "fr": "Réponses retardées détectées\nLa création dynamique d'états est mise en œuvre",
+                "it": "Rilevate risposte ritardate\nViene implementata la creazione dinamica di stati",
+                "es": "Respuestas tardías detectadas\nSe implementa la creación dinámica de estados.",
+                "pl": "Wykryte opóźnione odpowiedzi\nRealizowane jest dynamiczne tworzenie stanów",
+                "zh-cn": "检测到延迟响应\n动态创建状态"
+            },
+            "0.5.5": {
+                "en": "Relay inputs were corrected",
+                "de": "Relaiseingänge wurden korrigiert",
+                "ru": "Входы реле были исправлены",
+                "pt": "As entradas do relé foram corrigidas",
+                "nl": "Relais-ingangen zijn gecorrigeerd",
+                "fr": "Les entrées de relais ont été corrigées",
+                "it": "Gli ingressi del relè sono stati corretti",
+                "es": "Las entradas de relé fueron corregidas",
+                "pl": "Wejścia przekaźnikowe zostały skorygowane",
+                "zh-cn": "继电器输入已更正"
+            },
+            "0.5.4": {
+                "en": "Connection indication was corrected",
+                "de": "Verbindungsanzeige wurde korrigiert",
+                "ru": "Индикация подключения была исправлена",
+                "pt": "A indicação de conexão foi corrigida",
+                "nl": "Verbindingsindicatie is gecorrigeerd",
+                "fr": "L'indication de connexion a été corrigée",
+                "it": "L'indicazione di connessione è stata corretta",
+                "es": "Se corrigió la indicación de conexión",
+                "pl": "Wskazanie połączenia zostało poprawione",
+                "zh-cn": "连接指示已更正"
+            },
+            "0.5.1": {
+                "en": "Finger scanner supported\nAdded possibility to set the analog mode\nRelay outputs are supported now",
+                "de": "Fingerscanner unterstützt\nMöglichkeit zum Einstellen des Analogmodus hinzugefügt\nRelaisausgänge werden jetzt unterstützt",
+                "ru": "Сканер отпечатков пальцев поддерживается\nДобавлена возможность настройки аналогового режима\nРелейные выходы теперь поддерживаются",
+                "pt": "Scanner de dedo suportado\nPossibilidade adicionada para definir o modo analógico\nSaídas de relé agora são suportadas",
+                "nl": "Vingerscanner ondersteund\nMogelijkheid toegevoegd om de analoge modus in te stellen\nRelaisuitgangen worden nu ondersteund",
+                "fr": "Lecteur de doigt pris en charge\nAjout de la possibilité de régler le mode analogique\nLes sorties de relais sont prises en charge maintenant",
+                "it": "Scanner per dita supportato\nAggiunta la possibilità di impostare la modalità analogica\nLe uscite relè sono ora supportate",
+                "es": "Escáner de dedo compatible\nPosibilidad adicional de configurar el modo analógico\nLas salidas de relé son compatibles ahora",
+                "pl": "Obsługiwany skaner linii papilarnych\nDodano możliwość ustawienia trybu analogowego\nWyjścia przekaźnikowe są teraz obsługiwane",
+                "zh-cn": "支持指纹扫描仪\n增加了设置模拟模式的可能性\n现在支持继电器输出"
+            },
+            "0.4.4": {
+                "en": "Fixed error by parsing of acknowledgement",
+                "de": "Fehler beim Analysieren der Bestätigung behoben",
+                "ru": "Исправлена ошибка при разборе подтверждения",
+                "pt": "Corrigido erro ao analisar a confirmação",
+                "nl": "Fout verholpen door ontleden van bevestiging",
+                "fr": "Correction d'une erreur en analysant l'accusé de réception",
+                "it": "Risolto errore analizzando il riconoscimento",
+                "es": "Se corrigió el error al analizar el acuse de recibo",
+                "pl": "Naprawiono błąd przez analizowanie potwierdzenia",
+                "zh-cn": "通过解析确认修复错误"
+            },
+            "0.4.2": {
+                "en": "Support of old measure values was added.",
+                "ru": "Добавлена ​​поддержка старых значений показателей.",
+                "de": "Unterstützung alter Messwerte wurde hinzugefügt.",
+                "es": "Se añadió soporte de valores de medida antiguos.",
+                "it": "È stato aggiunto il supporto dei vecchi valori di misura.",
+                "nl": "Ondersteuning van oude meetwaarden is toegevoegd.",
+                "fr": "Le support des anciennes valeurs de mesure a été ajouté.",
+                "pl": "Dodano obsługę starych wartości miar.",
+                "zh-cn": "增加了对旧测量值的支持。",
+                "pt": "Suporte de valores de medida antigos foi adicionado."
+            }
+        },
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "lcn.png",
+        "enabled": false,
+        "materialize": true,
+        "messagebox": true,
+        "compact": true,
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/admin/lcn.png",
+        "keywords": [
+            "LCN"
+        ],
+        "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
+        "loglevel": "info",
+        "type": "iot-systems",
+        "authors": [
+            "bluefox <dogafox@gmail.com>"
+        ]
     },
-    "version": "1.0.2",
-    "news": {
-      "1.0.2": {
-        "en": "Implemented the regulators and the display support.",
-        "de": "Implementierte die Regler und die Display-Unterstützung.",
-        "ru": "Реализованы регуляторы и поддержка дисплея.",
-        "pt": "Implementei os reguladores e o suporte do display.",
-        "nl": "Implementeerde de toezichthouders en de display-ondersteuning.",
-        "fr": "Implémentation des régulateurs et du support d'affichage.",
-        "it": "Implementati i regolatori e il supporto display.",
-        "es": "Implementado los reguladores y el soporte de visualización.",
-        "pl": "Wdrożono regulatory i obsługę wyświetlacza.",
-        "zh-cn": "实施监管机构和显示支持。"
-      },
-      "0.6.3": {
-        "en": " General relays mode was implemented",
-        "de": " Der allgemeine Relaismodus wurde implementiert",
-        "ru": " Реализован режим общих реле",
-        "pt": " O modo de relés gerais foi implementado",
-        "nl": " Algemene relaismodus is geïmplementeerd",
-        "fr": " Le mode relais général a été implémenté",
-        "it": " È stata implementata la modalità relè generale",
-        "es": " Se implementó el modo de relés generales",
-        "pl": " Zaimplementowano ogólny tryb przekaźników",
-        "zh-cn": " 实施通用继电器模式"
-      },
-      "0.6.2": {
-        "en": "Detected delayed responses\nDynamical creation of states is implemented",
-        "de": "Verspätete Antworten festgestellt\nDas dynamische Erzeugen von Zuständen ist implementiert",
-        "ru": "Обнаружены задержанные ответы\nДинамическое создание состояний реализовано",
-        "pt": "Respostas atrasadas detectadas\nCriação dinâmica de estados é implementada",
-        "nl": "Vertraagde antwoorden gedetecteerd\nDynamische creatie van staten is geïmplementeerd",
-        "fr": "Réponses retardées détectées\nLa création dynamique d'états est mise en œuvre",
-        "it": "Rilevate risposte ritardate\nViene implementata la creazione dinamica di stati",
-        "es": "Respuestas tardías detectadas\nSe implementa la creación dinámica de estados.",
-        "pl": "Wykryte opóźnione odpowiedzi\nRealizowane jest dynamiczne tworzenie stanów",
-        "zh-cn": "检测到延迟响应\n动态创建状态"
-      },
-      "0.5.5": {
-        "en": "Relay inputs were corrected",
-        "de": "Relaiseingänge wurden korrigiert",
-        "ru": "Входы реле были исправлены",
-        "pt": "As entradas do relé foram corrigidas",
-        "nl": "Relais-ingangen zijn gecorrigeerd",
-        "fr": "Les entrées de relais ont été corrigées",
-        "it": "Gli ingressi del relè sono stati corretti",
-        "es": "Las entradas de relé fueron corregidas",
-        "pl": "Wejścia przekaźnikowe zostały skorygowane",
-        "zh-cn": "继电器输入已更正"
-      },
-      "0.5.4": {
-        "en": "Connection indication was corrected",
-        "de": "Verbindungsanzeige wurde korrigiert",
-        "ru": "Индикация подключения была исправлена",
-        "pt": "A indicação de conexão foi corrigida",
-        "nl": "Verbindingsindicatie is gecorrigeerd",
-        "fr": "L'indication de connexion a été corrigée",
-        "it": "L'indicazione di connessione è stata corretta",
-        "es": "Se corrigió la indicación de conexión",
-        "pl": "Wskazanie połączenia zostało poprawione",
-        "zh-cn": "连接指示已更正"
-      },
-      "0.5.1": {
-        "en": "Finger scanner supported\nAdded possibility to set the analog mode\nRelay outputs are supported now",
-        "de": "Fingerscanner unterstützt\nMöglichkeit zum Einstellen des Analogmodus hinzugefügt\nRelaisausgänge werden jetzt unterstützt",
-        "ru": "Сканер отпечатков пальцев поддерживается\nДобавлена возможность настройки аналогового режима\nРелейные выходы теперь поддерживаются",
-        "pt": "Scanner de dedo suportado\nPossibilidade adicionada para definir o modo analógico\nSaídas de relé agora são suportadas",
-        "nl": "Vingerscanner ondersteund\nMogelijkheid toegevoegd om de analoge modus in te stellen\nRelaisuitgangen worden nu ondersteund",
-        "fr": "Lecteur de doigt pris en charge\nAjout de la possibilité de régler le mode analogique\nLes sorties de relais sont prises en charge maintenant",
-        "it": "Scanner per dita supportato\nAggiunta la possibilità di impostare la modalità analogica\nLe uscite relè sono ora supportate",
-        "es": "Escáner de dedo compatible\nPosibilidad adicional de configurar el modo analógico\nLas salidas de relé son compatibles ahora",
-        "pl": "Obsługiwany skaner linii papilarnych\nDodano możliwość ustawienia trybu analogowego\nWyjścia przekaźnikowe są teraz obsługiwane",
-        "zh-cn": "支持指纹扫描仪\n增加了设置模拟模式的可能性\n现在支持继电器输出"
-      },
-      "0.4.4": {
-        "en": "Fixed error by parsing of acknowledgement",
-        "de": "Fehler beim Analysieren der Bestätigung behoben",
-        "ru": "Исправлена ошибка при разборе подтверждения",
-        "pt": "Corrigido erro ao analisar a confirmação",
-        "nl": "Fout verholpen door ontleden van bevestiging",
-        "fr": "Correction d'une erreur en analysant l'accusé de réception",
-        "it": "Risolto errore analizzando il riconoscimento",
-        "es": "Se corrigió el error al analizar el acuse de recibo",
-        "pl": "Naprawiono błąd przez analizowanie potwierdzenia",
-        "zh-cn": "通过解析确认修复错误"
-      },
-      "0.4.2": {
-        "en": "Support of old measure values was added.",
-        "ru": "Добавлена ​​поддержка старых значений показателей.",
-        "de": "Unterstützung alter Messwerte wurde hinzugefügt.",
-        "es": "Se añadió soporte de valores de medida antiguos.",
-        "it": "È stato aggiunto il supporto dei vecchi valori di misura.",
-        "nl": "Ondersteuning van oude meetwaarden is toegevoegd.",
-        "fr": "Le support des anciennes valeurs de mesure a été ajouté.",
-        "pl": "Dodano obsługę starych wartości miar.",
-        "zh-cn": "增加了对旧测量值的支持。",
-        "pt": "Suporte de valores de medida antigos foi adicionado."
-      }
+    "native": {
+        "port": 4114,
+        "host": "127.0.0.1",
+        "analogMode": 1,
+        "reconnectTimeout": 30,
+        "connectTimeout": 6000,
+        "defaultTimeout": 1000,
+        "pingInterval": 300,
+        "pingTimeout": 1000,
+        "user": "",
+        "password": "",
+        "debug": false,
+        "license": "",
+        "readAtStart": true,
+        "combinedRelays": true
     },
-    "platform": "Javascript/Node.js",
-    "mode": "daemon",
-    "icon": "lcn.png",
-    "enabled": false,
-    "materialize": true,
-    "messagebox": true,
-    "compact": true,
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/admin/lcn.png",
-    "keywords": [
-      "LCN"
-    ],
-    "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
-    "loglevel": "info",
-    "type": "iot-systems",
-    "authors": [
-      "bluefox <dogafox@gmail.com>"
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If connected to LCN server",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "scan",
+            "type": "channel",
+            "common": {
+                "name": "Scan process"
+            },
+            "native": {}
+        },
+        {
+            "_id": "scan.step",
+            "type": "state",
+            "common": {
+                "role": "value",
+                "name": "Scan process",
+                "type": "number",
+                "states": {
+                    "0": "no scan",
+                    "1": "detect devices",
+                    "2": "read devices"
+                },
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "scan.progress",
+            "type": "state",
+            "common": {
+                "role": "value",
+                "name": "Scan progress",
+                "type": "number",
+                "min": 0,
+                "max": 250,
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "scan.found",
+            "type": "state",
+            "common": {
+                "role": "value",
+                "name": "Found devices",
+                "type": "number",
+                "min": 0,
+                "max": 250,
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "scan.manual",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Manual device scan",
+                "desc": "Write device address in form S1:2 => Segment 1, Module 2. Optionally S1:2X. X = S - status, L - led. * - scan all known modules",
+                "type": "string",
+                "read": false,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir",
+            "type": "channel",
+            "common": {
+                "name": "IR receiver"
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir.serial",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Serial number",
+                "desc": "Serial number of IR receiver",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir.level",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Level",
+                "desc": "Level 1-4",
+                "type": "number",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir.key",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Button",
+                "desc": "Button 1-8",
+                "type": "number",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir.lowbat",
+            "type": "state",
+            "common": {
+                "role": "indicator.lowbat",
+                "name": "Low battery",
+                "desc": "Low battery for this serial",
+                "type": "boolean",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "ir.action",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Action",
+                "desc": "Action",
+                "type": "number",
+                "states": {
+                    "0": "release",
+                    "1": "short",
+                    "2": "long"
+                },
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "finger",
+            "type": "channel",
+            "common": {
+                "name": "Finger scanned"
+            },
+            "native": {}
+        },
+        {
+            "_id": "finger.code",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Finger code",
+                "desc": "Serial number of finger code",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        }
     ]
-  },
-  "native": {
-    "port": 4114,
-    "host": "127.0.0.1",
-    "analogMode": 1,
-    "reconnectTimeout": 30,
-    "connectTimeout": 6000,
-    "defaultTimeout": 1000,
-    "pingInterval": 300,
-    "pingTimeout": 1000,
-    "user": "",
-    "password": "",
-    "debug": false,
-    "license": "",
-    "readAtStart": true,
-    "combinedRelays": true
-  },
-  "objects": [
-  ],
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": "Information"
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": "If connected to LCN server",
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "scan",
-      "type": "channel",
-      "common": {
-        "name": "Scan process"
-      },
-      "native": {}
-    },
-    {
-      "_id": "scan.step",
-      "type": "state",
-      "common": {
-        "role": "value",
-        "name": "Scan process",
-        "type": "number",
-        "states": {
-          "0": "no scan",
-          "1": "detect devices",
-          "2": "read devices"
-        },
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "scan.progress",
-      "type": "state",
-      "common": {
-        "role": "value",
-        "name": "Scan progress",
-        "type": "number",
-        "min": 0,
-        "max": 250,
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "scan.found",
-      "type": "state",
-      "common": {
-        "role": "value",
-        "name": "Found devices",
-        "type": "number",
-        "min": 0,
-        "max": 250,
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "scan.manual",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Manual device scan",
-        "desc": "Write device address in form S1:2 => Segment 1, Module 2. Optionally S1:2X. X = S - status, L - led. * - scan all known modules",
-        "type": "string",
-        "read": false,
-        "write": true
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir",
-      "type": "channel",
-      "common": {
-        "name": "IR receiver"
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir.serial",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Serial number",
-        "desc": "Serial number of IR receiver",
-        "type": "string",
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir.level",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Level",
-        "desc": "Level 1-4",
-        "type": "number",
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir.key",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Button",
-        "desc": "Button 1-8",
-        "type": "number",
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir.lowbat",
-      "type": "state",
-      "common": {
-        "role": "indicator.lowbat",
-        "name": "Low battery",
-        "desc": "Low battery for this serial",
-        "type": "boolean",
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "ir.action",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Action",
-        "desc": "Action",
-        "type": "number",
-        "states": {
-          "0": "release",
-          "1": "short",
-          "2": "long"
-        },
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "finger",
-      "type": "channel",
-      "common": {
-        "name": "Finger scanned"
-      },
-      "native": {}
-    },
-    {
-      "_id": "finger.code",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Finger code",
-        "desc": "Serial number of finger code",
-        "type": "string",
-        "read": true,
-        "write": false
-      },
-      "native": {}
-    }
-  ]
 }
