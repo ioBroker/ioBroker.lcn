@@ -7,8 +7,20 @@
             "de": "LCN",
             "ru": "LCN"
         },
-        "version": "1.0.3",
+        "version": "1.0.4",
         "news": {
+            "1.0.4": {
+                "en": "Ack will be ignored for the display commands",
+                "de": "Die Bestätigung wird für die Anzeigebefehle ignoriert",
+                "ru": "Подтверждение будет игнорироваться для команд отображения",
+                "pt": "O reconhecimento será ignorado para os comandos de exibição",
+                "nl": "Ack wordt genegeerd voor de display-opdrachten",
+                "fr": "Ack sera ignoré pour les commandes d'affichage",
+                "it": "Ack verrà ignorato per i comandi di visualizzazione",
+                "es": "Ack se ignorará para los comandos de visualización",
+                "pl": "Potwierdzenie zostanie zignorowane dla poleceń wyświetlania",
+                "zh-cn": "对于显示命令，将忽略Ack"
+            },
             "1.0.3": {
                 "en": "Changed the calculation of the temperature variables",
                 "de": "Die Berechnung der Temperaturvariablen wurde geändert",

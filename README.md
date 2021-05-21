@@ -90,6 +90,9 @@ After the first start the devices must be scanned. It can be done in the configu
 	### __WORK IN PROGRESS__
 -->
 ## Changelog
+### 1.0.4 (2021-05-21)
+* (bluefox) Ack will be ignored for the display commands
+
 ### 1.0.3 (2021-05-21)
 * (bluefox) Changed the calculation of the temperature variables
 
