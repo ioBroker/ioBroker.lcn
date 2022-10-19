@@ -11,8 +11,21 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "1.1.0",
+    "version": "1.1.1",
     "news": {
+      "1.1.1": {
+        "en": "Corrected license check",
+        "de": "Korrigierte Lizenzprüfung",
+        "ru": "Исправлена проверка лицензии",
+        "pt": "Verificação de licença correta",
+        "nl": "Vertaling:",
+        "fr": "Vérification de la licence corrigée",
+        "it": "Controllo della licenza corretto",
+        "es": "Control de licencia corregido",
+        "pl": "Poprawka",
+        "uk": "Виправлена перевірка ліцензії",
+        "zh-cn": "更正的许可证检查"
+      },
       "1.1.0": {
         "en": "Corrected issue with password",
         "de": "Korrigiertes Problem mit Passwort",
@@ -85,18 +98,6 @@
         "es": "Respuestas tardías detectadas\nSe implementa la creación dinámica de estados.",
         "pl": "Wykryte opóźnione odpowiedzi\nRealizowane jest dynamiczne tworzenie stanów",
         "zh-cn": "检测到延迟响应\n动态创建状态"
-      },
-      "0.5.5": {
-        "en": "Relay inputs were corrected",
-        "de": "Relaiseingänge wurden korrigiert",
-        "ru": "Входы реле были исправлены",
-        "pt": "As entradas do relé foram corrigidas",
-        "nl": "Relais-ingangen zijn gecorrigeerd",
-        "fr": "Les entrées de relais ont été corrigées",
-        "it": "Gli ingressi del relè sono stati corretti",
-        "es": "Las entradas de relé fueron corregidas",
-        "pl": "Wejścia przekaźnikowe zostały skorygowane",
-        "zh-cn": "继电器输入已更正"
       }
     },
     "platform": "Javascript/Node.js",

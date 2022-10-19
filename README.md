@@ -90,6 +90,9 @@ After the first start the devices must be scanned. It can be done in the configu
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### 1.1.1 (2022-10-19)
+* (bluefox) Corrected license check
+
 ### 1.1.0 (2022-10-18)
 * (bluefox) Corrected issue with password
 
