@@ -11,8 +11,21 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "1.1.1",
+    "version": "1.1.7",
     "news": {
+      "1.1.7": {
+        "en": "Corrected setting of undefined values",
+        "de": "Korrigierte Einstellung undefinierter Werte",
+        "ru": "Исправлена настройка неопределенных значений",
+        "pt": "Configuração correta de valores indefinidos",
+        "nl": "Vertaling:",
+        "fr": "Réglage corrigé des valeurs indéfinies",
+        "it": "Impostazione corretta dei valori non definiti",
+        "es": "Ajuste corregido de valores indefinidos",
+        "pl": "Poprawienie nieokreślonych wartości",
+        "uk": "Виправлено налаштування не визначених значень",
+        "zh-cn": "B. 纠正未界定的价值观"
+      },
       "1.1.1": {
         "en": "Corrected license check",
         "de": "Korrigierte Lizenzprüfung",
@@ -86,18 +99,6 @@
         "es": " Se implementó el modo de relés generales",
         "pl": " Zaimplementowano ogólny tryb przekaźników",
         "zh-cn": " 实施通用继电器模式"
-      },
-      "0.6.2": {
-        "en": "Detected delayed responses\nDynamical creation of states is implemented",
-        "de": "Verspätete Antworten festgestellt\nDas dynamische Erzeugen von Zuständen ist implementiert",
-        "ru": "Обнаружены задержанные ответы\nДинамическое создание состояний реализовано",
-        "pt": "Respostas atrasadas detectadas\nCriação dinâmica de estados é implementada",
-        "nl": "Vertraagde antwoorden gedetecteerd\nDynamische creatie van staten is geïmplementeerd",
-        "fr": "Réponses retardées détectées\nLa création dynamique d'états est mise en œuvre",
-        "it": "Rilevate risposte ritardate\nViene implementata la creazione dinamica di stati",
-        "es": "Respuestas tardías detectadas\nSe implementa la creación dinámica de estados.",
-        "pl": "Wykryte opóźnione odpowiedzi\nRealizowane jest dynamiczne tworzenie stanów",
-        "zh-cn": "检测到延迟响应\n动态创建状态"
       }
     },
     "platform": "Javascript/Node.js",
