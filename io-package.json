@@ -11,8 +11,21 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "1.1.7",
+    "version": "1.1.8",
     "news": {
+      "1.1.8": {
+        "en": "Added SUM inputs",
+        "de": "SUM-Eingänge hinzugefügt",
+        "ru": "Добавлены SUM входы",
+        "pt": "Adicionado entradas SUM",
+        "nl": "Toegevoegd SUM inputs",
+        "fr": "Ajout des entrées SUM",
+        "it": "Ingressi SUM aggiunti",
+        "es": "Entradas adicionales de SUM",
+        "pl": "Wejście SUM",
+        "uk": "Додано введення SUM",
+        "zh-cn": "增加特别小组投入"
+      },
       "1.1.7": {
         "en": "Corrected setting of undefined values",
         "de": "Korrigierte Einstellung undefinierter Werte",
@@ -87,18 +100,6 @@
         "es": "Implementado los reguladores y el soporte de visualización.",
         "pl": "Wdrożono regulatory i obsługę wyświetlacza.",
         "zh-cn": "实施监管机构和显示支持。"
-      },
-      "0.6.3": {
-        "en": " General relays mode was implemented",
-        "de": " Der allgemeine Relaismodus wurde implementiert",
-        "ru": " Реализован режим общих реле",
-        "pt": " O modo de relés gerais foi implementado",
-        "nl": " Algemene relaismodus is geïmplementeerd",
-        "fr": " Le mode relais général a été implémenté",
-        "it": " È stata implementata la modalità relè generale",
-        "es": " Se implementó el modo de relés generales",
-        "pl": " Zaimplementowano ogólny tryb przekaźników",
-        "zh-cn": " 实施通用继电器模式"
       }
     },
     "platform": "Javascript/Node.js",

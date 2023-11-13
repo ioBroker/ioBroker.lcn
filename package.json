@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lcn",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "ioBroker LCN Adapter",
   "author": {
     "name": "bluefox",
@@ -29,7 +29,7 @@
     "@alcalzone/release-script": "^3.6.0",
     "@alcalzone/release-script-plugin-iobroker": "^3.6.0",
     "@alcalzone/release-script-plugin-license": "^3.5.9",
-    "@babel/preset-env": "^7.23.2",
+    "@babel/preset-env": "^7.23.3",
     "nodegit": "^0.27.0",
     "gulp-javascript-obfuscator": "^1.1.6",
     "babel-core": "^6.26.3",
@@ -60,7 +60,6 @@
     "test": "node node_modules/mocha/bin/mocha --exit",
     "prepublishOnly": "echo \"Error: publish from dist directory and write gulp\" && exit 1",
     "start": "node lcn.js",
-    "github": "gulp github",
     "build": "node node_modules/gulp/bin/gulp.js",
     "release": "release-script",
     "release-patch": "release-script patch --yes",
