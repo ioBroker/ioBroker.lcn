@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lcn",
-  "version": "1.1.8",
+  "version": "2.0.0",
   "description": "ioBroker LCN Adapter",
   "author": {
     "name": "bluefox",
@@ -18,19 +18,22 @@
     "ioBroker",
     "lcn"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ioBroker/ioBroker.lcn"
   },
   "dependencies": {
+    "@iobroker/adapter-core": "^3.1.6",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "^3.6.0",
-    "@alcalzone/release-script-plugin-iobroker": "^3.6.0",
-    "@alcalzone/release-script-plugin-license": "^3.5.9",
-    "@babel/preset-env": "^7.23.3",
-    "nodegit": "^0.27.0",
+    "@alcalzone/release-script": "^3.8.0",
+    "@alcalzone/release-script-plugin-iobroker": "^3.7.2",
+    "@alcalzone/release-script-plugin-license": "^3.7.0",
+    "@babel/preset-env": "^7.25.3",
     "gulp-javascript-obfuscator": "^1.1.6",
     "babel-core": "^6.26.3",
     "babel-minify": "^0.5.2",
@@ -38,10 +41,10 @@
     "babel-preset-es2015": "^6.24.1",
     "babelify": "^10.0.0",
     "browserify": "^17.0.0",
-    "chai": "^4.3.10",
+    "chai": "^4.5.0",
     "gulp": "^4.0.2",
     "gulp-sourcemaps": "^3.0.0",
-    "mocha": "^10.2.0",
+    "mocha": "^10.7.0",
     "sourcemap-lookup": "^0.0.5",
     "vinyl-source-stream": "^2.0.0",
     "vinyl-sourcemaps-apply": "^0.2.1"

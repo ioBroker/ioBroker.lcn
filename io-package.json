@@ -4,15 +4,37 @@
     "title": "LCN connection",
     "titleLang": {
       "en": "LCN connection",
-      "de": "LCN Verbindung"
+      "de": "LCN Verbindung",
+      "ru": "Подключение LCN",
+      "pt": "Conexão LCN",
+      "nl": "LCN-verbinding",
+      "fr": "Connexion LCN",
+      "it": "Connessione LCN",
+      "es": "Conexión LCN",
+      "pl": "Połączenie LCN",
+      "uk": "Підключення LCN",
+      "zh-cn": "LCN 连接"
     },
     "desc": {
       "en": "LCN",
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "1.1.8",
+    "version": "2.0.0",
     "news": {
+      "2.0.0": {
+        "en": "Made adapter compatible with js-controller 6\nA minimum supported node.js version is 18",
+        "de": "Hergestellter Adapter kompatibel mit js-controller 6\nEine minimal unterstützte node.js-Version ist 18",
+        "ru": "Сделанный адаптер совместимый с js-контроллером 6\nМинимальная поддерживаемая версия node.js - 18",
+        "pt": "Adaptador feito compatível com js-controller 6\nUma versão mínima suportada node.js é 18",
+        "nl": "Maatadapter compatibel met js-controller 6\nEen minimaal ondersteunde node.js versie is 18",
+        "fr": "Adaptateur compatible avec js-controller 6\nUne version minimum prise en charge node.js est 18",
+        "it": "Adattatore realizzato compatibile con js-controller 6\nUna versione minima node.js supportata è 18",
+        "es": "Adaptador hecho compatible con js-controller 6\nUna versión mínima de node.js es 18",
+        "pl": "Wykonany adapter kompatybilny ze sterownikiem js- 6\nMinimalna obsługiwana wersja node.js to 18",
+        "uk": "Виготовлений адаптер сумісний з js-controller 6\nМінімальна підтримана вершина.js версія 18",
+        "zh-cn": "使适配器与 js 控制器 6 兼容\n最小支持的节点.js版本为 18"
+      },
       "1.1.8": {
         "en": "Added SUM inputs",
         "de": "SUM-Eingänge hinzugefügt",
@@ -88,18 +110,6 @@
         "es": "Se modificó el cálculo de las variables de temperatura.",
         "pl": "Zmieniono obliczenia zmiennych temperatury",
         "zh-cn": "更改了温度变量的计算"
-      },
-      "1.0.2": {
-        "en": "Implemented the regulators and the display support.",
-        "de": "Implementierte die Regler und die Display-Unterstützung.",
-        "ru": "Реализованы регуляторы и поддержка дисплея.",
-        "pt": "Implementei os reguladores e o suporte do display.",
-        "nl": "Implementeerde de toezichthouders en de display-ondersteuning.",
-        "fr": "Implémentation des régulateurs et du support d'affichage.",
-        "it": "Implementati i regolatori e il supporto display.",
-        "es": "Implementado los reguladores y el soporte de visualización.",
-        "pl": "Wdrożono regulatory i obsługę wyświetlacza.",
-        "zh-cn": "实施监管机构和显示支持。"
       }
     },
     "platform": "Javascript/Node.js",
@@ -113,12 +123,18 @@
     "keywords": [
       "LCN"
     ],
+    "licenseInformation": {
+      "license": "CC-BY-NC-4.0",
+      "type": "commercial",
+      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/LICENSE"
+    },
     "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
     "loglevel": "info",
     "type": "iot-systems",
     "authors": [
       "bluefox <dogafox@gmail.com>"
     ],
+    "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
     "messages": [

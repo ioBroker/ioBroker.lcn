@@ -90,6 +90,10 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### 2.0.0 (2024-08-06)
+* (bluefox) Made adapter compatible with js-controller 6
+* (bluefox) A minimum supported node.js version is 18
+
 ### 1.1.8 (2023-11-13)
 * (bluefox) Added SUM inputs
 
@@ -144,6 +148,6 @@ After the first start, the devices must be scanned. It can be done in the config
 ## License
 CC-BY-NC-4.0
 
-Copyright (c) 2018-2023 Bluefox <dogafox@gmail.com>
+Copyright (c) 2018-2024 Bluefox <dogafox@gmail.com>
 
 Up to 10 devices can be connected for free. If you need more devices, you must buy a commercial license.
