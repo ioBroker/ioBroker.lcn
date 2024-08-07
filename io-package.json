@@ -20,8 +20,21 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "2.0.0",
+    "version": "2.0.1",
     "news": {
+      "2.0.1": {
+        "en": "Disable possibility to install via git",
+        "de": "Deaktivieren Sie die Möglichkeit über git zu installieren",
+        "ru": "Отключить возможность установки через git",
+        "pt": "Desativar a possibilidade de instalar via git",
+        "nl": "De mogelijkheid uitschakelen om via git te installeren",
+        "fr": "Désactiver la possibilité d'installer via git",
+        "it": "Disattiva la possibilità di installare tramite git",
+        "es": "Posibilidad de instalar mediante git",
+        "pl": "Wyłącz możliwość instalacji przez git",
+        "uk": "Вимкнути можливість установки через git",
+        "zh-cn": "禁用通过 git 安装的可能性"
+      },
       "2.0.0": {
         "en": "Made adapter compatible with js-controller 6\nA minimum supported node.js version is 18",
         "de": "Hergestellter Adapter kompatibel mit js-controller 6\nEine minimal unterstützte node.js-Version ist 18",
@@ -98,18 +111,6 @@
         "es": "Ack se ignorará para los comandos de visualización",
         "pl": "Potwierdzenie zostanie zignorowane dla poleceń wyświetlania",
         "zh-cn": "对于显示命令，将忽略Ack"
-      },
-      "1.0.3": {
-        "en": "Changed the calculation of the temperature variables",
-        "de": "Die Berechnung der Temperaturvariablen wurde geändert",
-        "ru": "Изменен расчет температурных переменных.",
-        "pt": "Alterou o cálculo das variáveis de temperatura",
-        "nl": "De berekening van de temperatuurvariabelen gewijzigd",
-        "fr": "Changement du calcul des variables de température",
-        "it": "Modificato il calcolo delle variabili di temperatura",
-        "es": "Se modificó el cálculo de las variables de temperatura.",
-        "pl": "Zmieniono obliczenia zmiennych temperatury",
-        "zh-cn": "更改了温度变量的计算"
       }
     },
     "platform": "Javascript/Node.js",
@@ -137,6 +138,7 @@
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
+    "nogit": true,
     "messages": [
       {
         "condition": {

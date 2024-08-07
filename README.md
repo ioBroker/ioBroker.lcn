@@ -90,6 +90,9 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### 2.0.1 (2024-08-07)
+* (bluefox) Disable possibility to install via git
+
 ### 2.0.0 (2024-08-06)
 * (bluefox) Made adapter compatible with js-controller 6
 * (bluefox) A minimum supported node.js version is 18
