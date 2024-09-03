@@ -20,8 +20,21 @@
       "de": "LCN",
       "ru": "LCN"
     },
-    "version": "2.0.1",
+    "version": "2.0.2",
     "news": {
+      "2.0.2": {
+        "en": "Corrected checking of licenses with license manager",
+        "de": "Korrigierte Überprüfung von Lizenzen mit Lizenzmanager",
+        "ru": "Исправлена проверка лицензий с лицензионным менеджером",
+        "pt": "Verificação correta de licenças com gerenciador de licenças",
+        "nl": "Gecorrigeerde controle van licenties met licentiebeheerder",
+        "fr": "Vérification corrigée des licences avec le gestionnaire de licence",
+        "it": "Controllo corretto delle licenze con il gestore di licenze",
+        "es": "Comprobación corregida de licencias con gestor de licencias",
+        "pl": "Poprawione sprawdzanie licencji z menedżerem licencji",
+        "uk": "Виправлена перевірка ліцензійного менеджера",
+        "zh-cn": "与许可证管理者核对许可证"
+      },
       "2.0.1": {
         "en": "Disable possibility to install via git",
         "de": "Deaktivieren Sie die Möglichkeit über git zu installieren",
@@ -99,18 +112,6 @@
         "pl": "Kwalifikacja z hasłem",
         "uk": "Виправлено проблему з паролем",
         "zh-cn": "用密码更正问题"
-      },
-      "1.0.4": {
-        "en": "Ack will be ignored for the display commands",
-        "de": "Die Bestätigung wird für die Anzeigebefehle ignoriert",
-        "ru": "Подтверждение будет игнорироваться для команд отображения",
-        "pt": "O reconhecimento será ignorado para os comandos de exibição",
-        "nl": "Ack wordt genegeerd voor de display-opdrachten",
-        "fr": "Ack sera ignoré pour les commandes d'affichage",
-        "it": "Ack verrà ignorato per i comandi di visualizzazione",
-        "es": "Ack se ignorará para los comandos de visualización",
-        "pl": "Potwierdzenie zostanie zignorowane dla poleceń wyświetlania",
-        "zh-cn": "对于显示命令，将忽略Ack"
       }
     },
     "platform": "Javascript/Node.js",

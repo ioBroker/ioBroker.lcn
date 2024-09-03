@@ -90,6 +90,9 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### 2.0.2 (2024-09-03)
+* (bluefox) Corrected checking of licenses with license manager
+
 ### 2.0.1 (2024-08-07)
 * (bluefox) Disable possibility to install via git
 
