@@ -1,7 +1,6 @@
 {
   "common": {
     "name": "lcn",
-    "title": "LCN connection",
     "titleLang": {
       "en": "LCN connection",
       "de": "LCN Verbindung",
@@ -16,12 +15,59 @@
       "zh-cn": "LCN 连接"
     },
     "desc": {
-      "en": "LCN",
-      "de": "LCN",
-      "ru": "LCN"
+      "en": "LCN - Local Control Network",
+      "de": "LCN - Local Control Network",
+      "ru": "LCN - Local Control Network",
+      "pt": "LCN - Local Control Network",
+      "nl": "LCN - Local Control Network",
+      "fr": "LCN - Local Control Network",
+      "it": "LCN - Local Control Network",
+      "es": "LCN - Local Control Network",
+      "pl": "LCN - Local Control Network",
+      "uk": "LCN - Local Control Network",
+      "zh-cn": "LCN - Local Control Network"
     },
-    "version": "2.0.0",
+    "version": "2.0.3",
     "news": {
+      "2.0.3": {
+        "en": "Added translations",
+        "de": "Übersetzungen hinzugefügt",
+        "ru": "Добавленные переводы",
+        "pt": "Adicionadas traduções",
+        "nl": "Toegevoegde vertalingen",
+        "fr": "Traductions ajoutées",
+        "it": "Traduzioni aggiuntive",
+        "es": "Traducciones adicionales",
+        "pl": "Dodano tłumaczenia",
+        "uk": "Додано переклади",
+        "zh-cn": "添加翻译"
+      },
+      "2.0.2": {
+        "en": "Corrected checking of licenses with license manager",
+        "de": "Korrigierte Überprüfung von Lizenzen mit Lizenzmanager",
+        "ru": "Исправлена проверка лицензий с лицензионным менеджером",
+        "pt": "Verificação correta de licenças com gerenciador de licenças",
+        "nl": "Gecorrigeerde controle van licenties met licentiebeheerder",
+        "fr": "Vérification corrigée des licences avec le gestionnaire de licence",
+        "it": "Controllo corretto delle licenze con il gestore di licenze",
+        "es": "Comprobación corregida de licencias con gestor de licencias",
+        "pl": "Poprawione sprawdzanie licencji z menedżerem licencji",
+        "uk": "Виправлена перевірка ліцензійного менеджера",
+        "zh-cn": "与许可证管理者核对许可证"
+      },
+      "2.0.1": {
+        "en": "Disable possibility to install via git",
+        "de": "Deaktivieren Sie die Möglichkeit über git zu installieren",
+        "ru": "Отключить возможность установки через git",
+        "pt": "Desativar a possibilidade de instalar via git",
+        "nl": "De mogelijkheid uitschakelen om via git te installeren",
+        "fr": "Désactiver la possibilité d'installer via git",
+        "it": "Disattiva la possibilità di installare tramite git",
+        "es": "Posibilidad de instalar mediante git",
+        "pl": "Wyłącz możliwość instalacji przez git",
+        "uk": "Вимкнути можливість установки через git",
+        "zh-cn": "禁用通过 git 安装的可能性"
+      },
       "2.0.0": {
         "en": "Made adapter compatible with js-controller 6\nA minimum supported node.js version is 18",
         "de": "Hergestellter Adapter kompatibel mit js-controller 6\nEine minimal unterstützte node.js-Version ist 18",
@@ -73,43 +119,6 @@
         "pl": "Poprawka",
         "uk": "Виправлена перевірка ліцензії",
         "zh-cn": "更正的许可证检查"
-      },
-      "1.1.0": {
-        "en": "Corrected issue with password",
-        "de": "Korrigiertes Problem mit Passwort",
-        "ru": "Исправлена проблема с паролем",
-        "pt": "Problema corrigido com senha",
-        "nl": "Vertaling:",
-        "fr": "Problème corrigé avec mot de passe",
-        "it": "Emissione corretta con password",
-        "es": "Edición corregida con contraseña",
-        "pl": "Kwalifikacja z hasłem",
-        "uk": "Виправлено проблему з паролем",
-        "zh-cn": "用密码更正问题"
-      },
-      "1.0.4": {
-        "en": "Ack will be ignored for the display commands",
-        "de": "Die Bestätigung wird für die Anzeigebefehle ignoriert",
-        "ru": "Подтверждение будет игнорироваться для команд отображения",
-        "pt": "O reconhecimento será ignorado para os comandos de exibição",
-        "nl": "Ack wordt genegeerd voor de display-opdrachten",
-        "fr": "Ack sera ignoré pour les commandes d'affichage",
-        "it": "Ack verrà ignorato per i comandi di visualizzazione",
-        "es": "Ack se ignorará para los comandos de visualización",
-        "pl": "Potwierdzenie zostanie zignorowane dla poleceń wyświetlania",
-        "zh-cn": "对于显示命令，将忽略Ack"
-      },
-      "1.0.3": {
-        "en": "Changed the calculation of the temperature variables",
-        "de": "Die Berechnung der Temperaturvariablen wurde geändert",
-        "ru": "Изменен расчет температурных переменных.",
-        "pt": "Alterou o cálculo das variáveis de temperatura",
-        "nl": "De berekening van de temperatuurvariabelen gewijzigd",
-        "fr": "Changement du calcul des variables de température",
-        "it": "Modificato il calcolo delle variabili di temperatura",
-        "es": "Se modificó el cálculo de las variables de temperatura.",
-        "pl": "Zmieniono obliczenia zmiennych temperatury",
-        "zh-cn": "更改了温度变量的计算"
       }
     },
     "platform": "Javascript/Node.js",
@@ -126,7 +135,7 @@
     "licenseInformation": {
       "license": "CC-BY-NC-4.0",
       "type": "commercial",
-      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/LICENSE"
+      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/HOW-TO-GET-LICENSE.md"
     },
     "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
     "loglevel": "info",
@@ -137,6 +146,7 @@
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
+    "nogit": true,
     "messages": [
       {
         "condition": {
