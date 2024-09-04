@@ -1,7 +1,6 @@
 {
   "common": {
     "name": "lcn",
-    "title": "LCN connection",
     "titleLang": {
       "en": "LCN connection",
       "de": "LCN Verbindung",
@@ -16,12 +15,33 @@
       "zh-cn": "LCN 连接"
     },
     "desc": {
-      "en": "LCN",
-      "de": "LCN",
-      "ru": "LCN"
+      "en": "LCN - Local Control Network",
+      "de": "LCN - Local Control Network",
+      "ru": "LCN - Local Control Network",
+      "pt": "LCN - Local Control Network",
+      "nl": "LCN - Local Control Network",
+      "fr": "LCN - Local Control Network",
+      "it": "LCN - Local Control Network",
+      "es": "LCN - Local Control Network",
+      "pl": "LCN - Local Control Network",
+      "uk": "LCN - Local Control Network",
+      "zh-cn": "LCN - Local Control Network"
     },
-    "version": "2.0.2",
+    "version": "2.0.3",
     "news": {
+      "2.0.3": {
+        "en": "Added translations",
+        "de": "Übersetzungen hinzugefügt",
+        "ru": "Добавленные переводы",
+        "pt": "Adicionadas traduções",
+        "nl": "Toegevoegde vertalingen",
+        "fr": "Traductions ajoutées",
+        "it": "Traduzioni aggiuntive",
+        "es": "Traducciones adicionales",
+        "pl": "Dodano tłumaczenia",
+        "uk": "Додано переклади",
+        "zh-cn": "添加翻译"
+      },
       "2.0.2": {
         "en": "Corrected checking of licenses with license manager",
         "de": "Korrigierte Überprüfung von Lizenzen mit Lizenzmanager",
@@ -99,19 +119,6 @@
         "pl": "Poprawka",
         "uk": "Виправлена перевірка ліцензії",
         "zh-cn": "更正的许可证检查"
-      },
-      "1.1.0": {
-        "en": "Corrected issue with password",
-        "de": "Korrigiertes Problem mit Passwort",
-        "ru": "Исправлена проблема с паролем",
-        "pt": "Problema corrigido com senha",
-        "nl": "Vertaling:",
-        "fr": "Problème corrigé avec mot de passe",
-        "it": "Emissione corretta con password",
-        "es": "Edición corregida con contraseña",
-        "pl": "Kwalifikacja z hasłem",
-        "uk": "Виправлено проблему з паролем",
-        "zh-cn": "用密码更正问题"
       }
     },
     "platform": "Javascript/Node.js",
@@ -128,7 +135,7 @@
     "licenseInformation": {
       "license": "CC-BY-NC-4.0",
       "type": "commercial",
-      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/LICENSE"
+      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/HOW-TO-GET-LICENSE.md"
     },
     "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
     "loglevel": "info",
