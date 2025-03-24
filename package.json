@@ -33,43 +33,29 @@
     "@alcalzone/release-script": "^3.8.0",
     "@alcalzone/release-script-plugin-iobroker": "^3.7.2",
     "@alcalzone/release-script-plugin-license": "^3.7.0",
-    "@babel/preset-env": "^7.25.3",
+    "@iobroker/build-tools": "^2.0.15",
+    "@iobroker/eslint-config": "^2.0.1",
+    "@iobroker/legacy-testing": "^2.0.2",
     "@iobroker/testing": "^4.1.3",
-    "gulp-javascript-obfuscator": "^1.1.6",
-    "babel-core": "^6.26.3",
-    "babel-minify": "^0.5.2",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babelify": "^10.0.0",
-    "browserify": "^17.0.0",
     "chai": "^4.5.0",
-    "gulp": "^4.0.2",
-    "gulp-sourcemaps": "^3.0.0",
-    "mocha": "^10.7.0",
-    "sourcemap-lookup": "^0.0.5",
-    "vinyl-source-stream": "^2.0.0",
-    "vinyl-sourcemaps-apply": "^0.2.1"
+    "mocha": "^10.7.0"
   },
-  "main": "lcn.js",
+  "main": "main.js",
   "files": [
     "admin/",
     "img/",
+    "lib/",
     "main.js",
     "io-package.json",
-    "LICENSE",
-    "lib/cloudCert.crt",
-    "lib/utils.js"
+    "LICENSE"
   ],
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha --exit",
-    "prepublishOnly": "echo \"Error: publish from dist directory and write gulp\" && exit 1",
-    "start": "node lcn.js",
-    "build": "node node_modules/gulp/bin/gulp.js",
+    "test": "mocha --exit",
     "release": "release-script",
     "release-patch": "release-script patch --yes",
     "release-minor": "release-script minor --yes",
     "release-major": "release-script major --yes",
-    "update-packages": "ncu --upgrade"
+    "update-packages": "npx -y npm-check-updates --upgrade"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.lcn/issues"

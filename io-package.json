@@ -133,9 +133,8 @@
       "LCN"
     ],
     "licenseInformation": {
-      "license": "CC-BY-NC-4.0",
-      "type": "commercial",
-      "link": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/HOW-TO-GET-LICENSE.md"
+      "license": "MIT",
+      "type": "free",
     },
     "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
     "loglevel": "info",
@@ -146,7 +145,6 @@
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
-    "nogit": true,
     "messages": [
       {
         "condition": {
@@ -206,10 +204,8 @@
     "user": "",
     "password": "",
     "debug": false,
-    "license": "",
     "readAtStart": true,
-    "combinedRelays": true,
-    "useLicenseManager": 0
+    "combinedRelays": true
   },
   "objects": [],
   "instanceObjects": [

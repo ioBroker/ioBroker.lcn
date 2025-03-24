@@ -14,6 +14,5 @@ package-lock.json
 /lib/total.json
 /lib/*.sh
 /lib/restore.json
-main.js
 /dist
 /iob_npm.done

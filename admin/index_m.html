@@ -1,0 +1,750 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <!-- Materialze style -->
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="../../css/adapter.css"
+        />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="../../lib/css/materialize.css"
+        />
+
+        <script
+            type="text/javascript"
+            src="../../lib/js/jquery-3.2.1.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="../../socket.io/socket.io.js"
+        ></script>
+
+        <script
+            type="text/javascript"
+            src="../../js/translate.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="../../lib/js/materialize.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="../../js/adapter-settings.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="words.js"
+        ></script>
+
+        <script type="text/javascript">
+            // var secret = '';
+
+            function copyToClipboard(text, e) {
+                const el = window.document.createElement('textarea');
+                el.value = text;
+                window.document.body.appendChild(el);
+                el.select();
+                window.document.execCommand('copy');
+                window.document.body.removeChild(el);
+                console.log(text);
+                e && e.stopPropagation();
+                e && e.preventDefault();
+            }
+
+            if (typeof encrypt === 'undefined') {
+                encrypt = function encrypt(key, value) {
+                    var result = '';
+                    for (var i = 0; i < value.length; i++) {
+                        result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+                    }
+                    return result;
+                };
+                decrypt = function decrypt(key, value) {
+                    var result = '';
+                    for (var i = 0; i < value.length; i++) {
+                        result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+                    }
+                    return result;
+                };
+            }
+
+            function parseJwt(token) {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace('-', '+').replace('_', '/');
+                return JSON.parse(window.atob(base64));
+            }
+
+            function readAll() {
+                $('#getAll').addClass('disabled');
+                sendTo(null, 'getAll', null, function (list) {
+                    $('#getAll').removeClass('disabled');
+
+                    if (list && list.length) {
+                        var text = '<table>';
+                        for (var i = 0; i < list.length; i++) {
+                            var options = [];
+                            list[i].native.analogs && options.push('Analogs: ' + list[i].native.analogs);
+                            list[i].native.leds && options.push('LEDS: ' + list[i].native.leds);
+                            list[i].native.sensors && options.push('Sensors: ' + list[i].native.sensors);
+                            list[i].native.relays && options.push('Relays: ' + list[i].native.relays);
+                            list[i].native.vars && options.push('Vars: ' + list[i].native.vars);
+
+                            text +=
+                                '<tr>' +
+                                '<td style="font-size: 10px">' +
+                                (i + 1) +
+                                '</td>' +
+                                '<td style="font-weight: bold">S' +
+                                list[i].native.segment +
+                                ':M' +
+                                list[i].native.module +
+                                '</td>' +
+                                '<td>' +
+                                list[i].common.name +
+                                '</td>' +
+                                '<td><img alt="" src=".' +
+                                list[i].common.icon +
+                                '" style="width: 32px"/></td>' +
+                                '<td>' +
+                                list[i].native.hwType +
+                                '</td>' +
+                                '<td>' +
+                                options.join(', ') +
+                                '</td>' +
+                                '<td class="input-field input-very-compact"><input class="relays" type="number" min="0" max="8" data-id="' +
+                                list[i].id +
+                                '" value="' +
+                                (list[i].native.relaysOut || '0') +
+                                '"/><label>' +
+                                _('Relays') +
+                                '</label></td>' +
+                                '<td class="input-field input-very-compact regulator"><input type="checkbox" data-id="' +
+                                list[i].id +
+                                '" checked="' +
+                                (list[i].native.regulator ? 'checked' : '') +
+                                '"/><span>' +
+                                _('Regulator') +
+                                '</span></td>' +
+                                '<td class="input-field input-very-compact display"  ><input type="checkbox" data-id="' +
+                                list[i].id +
+                                '" checked="' +
+                                (list[i].native.display ? 'checked' : '') +
+                                '"/><span>' +
+                                _('Display') +
+                                '</span></td>' +
+                                '<td><a class="btn-floating btn-small waves-effect waves-light green rescan" data-module="' +
+                                list[i].native.module +
+                                '" title="' +
+                                _('Rescan') +
+                                '"><i class="material-icons">refresh</i></a></td>' +
+                                '</tr>';
+                        }
+                        text += '</table>';
+                        $('.modules').html(text);
+
+                        $('.rescan').on('click', function () {
+                            var module = $(this).data('module');
+                            $('.rescan').addClass('disabled');
+
+                            sendTo(null, 'scan', { max: `${module}-${module}` }, function (result) {
+                                $('.rescan').removeClass('disabled');
+                                setTimeout(readAll, 1000);
+                            });
+                        });
+
+                        $('.relays').on('change', function () {
+                            var $this = $(this);
+                            var id = $this.data('id');
+                            var val = $this.val();
+                            var timeout = $this.data('timeout');
+                            timeout && clearTimeout(timeout);
+                            $this.addClass('saving');
+                            $this.data(
+                                'timeout',
+                                setTimeout(function () {
+                                    $this.data('timeout', 0);
+
+                                    socket.emit('getObject', id, function (err, obj) {
+                                        if (obj && obj.native) {
+                                            obj.native.relaysOut = parseInt(val) || 0;
+                                            socket.emit('setObject', obj._id, obj, function (err, obj) {
+                                                $this.removeClass('saving');
+                                            });
+                                        }
+                                    });
+                                }, 300),
+                            );
+                        });
+                        $('.regulator').on('click', function () {
+                            var $pThis = $(this);
+                            var $this = $pThis.find('input');
+                            var id = $this.data('id');
+                            var val = !$this.prop('checked');
+                            $this.prop('checked', val);
+                            var timeout = $this.data('timeout');
+                            timeout && clearTimeout(timeout);
+                            $pThis.addClass('saving');
+                            $this.data(
+                                'timeout',
+                                setTimeout(function () {
+                                    $this.data('timeout', 0);
+
+                                    socket.emit('getObject', id, function (err, obj) {
+                                        if (obj && obj.native) {
+                                            obj.native.regulator = !!val;
+                                            socket.emit('setObject', obj._id, obj, function (err, obj) {
+                                                $pThis.removeClass('saving');
+                                            });
+                                        }
+                                    });
+                                }, 300),
+                            );
+                        });
+                        $('.display').on('click', function () {
+                            var $pThis = $(this);
+                            var $this = $pThis.find('input');
+                            var id = $this.data('id');
+                            var val = !$this.prop('checked');
+                            $this.prop('checked', val);
+                            var timeout = $this.data('timeout');
+                            timeout && clearTimeout(timeout);
+                            $pThis.addClass('saving');
+                            $this.data(
+                                'timeout',
+                                setTimeout(function () {
+                                    $this.data('timeout', 0);
+
+                                    socket.emit('getObject', id, function (err, obj) {
+                                        if (obj && obj.native) {
+                                            obj.native.display = !!val;
+                                            socket.emit('setObject', obj._id, obj, function (err, obj) {
+                                                $pThis.removeClass('saving');
+                                            });
+                                        }
+                                    });
+                                }, 300),
+                            );
+                        });
+                    } else {
+                        $('.modules').html('');
+                        showMessage(_('No config'));
+                    }
+                });
+            }
+
+            function scan() {
+                $('#scan').addClass('disabled');
+                $('.scan-items').show();
+                $('#scanMax').addClass('disabled').prop('disabled', true);
+                $('.determinate').css('width', 0);
+                sendTo(null, 'scan', { max: $('#scanMax').val() }, function (result) {
+                    $('#scan').removeClass('disabled');
+                    $('#scanMax').removeClass('disabled').prop('disabled', false);
+                    $('.scan-items').hide();
+
+                    if (!result.error) {
+                        showMessage(
+                            _('Found %s devices, new of them %s devices.', result.total, result._new),
+                            _('Scan finished'),
+                        );
+                    } else {
+                        showError(result.error);
+                    }
+                });
+            }
+
+            function load(settings, onChange) {
+                if (!settings) {
+                    return;
+                }
+
+                // secret = (systemConfig && systemConfig.native && systemConfig.native.secret) || 'Zgfr56gFe87jJOM';
+
+                if (settings.password === undefined) settings.password = '';
+                if (settings.prompt === undefined) settings.prompt = 'lcn>';
+                if (settings.analogMode === undefined) settings.analogMode = 1;
+                if (settings.connectTimeout === undefined) settings.connectTimeout = 6000;
+                if (settings.scanResponseTimeout === undefined) settings.scanResponseTimeout = 1000;
+                if (settings.combinedRelays === undefined) settings.combinedRelays = true;
+
+                /*if (settings.password) {
+                settings.password  = decrypt(secret, settings.password);
+            }*/
+                $('#passwordRepeat').val(settings.password);
+
+                $('.value').each(function () {
+                    var key = $(this).attr('id');
+                    var $value = $('#' + key + '.value');
+                    if ($value.attr('type') === 'checkbox') {
+                        $value.prop('checked', settings[key]).on('change', function () {
+                            onChange();
+                        });
+                    } else {
+                        $value
+                            .val(settings[key])
+                            .on('change', function () {
+                                onChange();
+                            })
+                            .on('keyup', function () {
+                                onChange();
+                            });
+                    }
+                });
+                socket.emit('subscribe', `${adapter}.${instance}.scan.step`);
+                socket.emit('subscribe', `${adapter}.${instance}.scan.progress`);
+                socket.emit('subscribe', `${adapter}.${instance}.scan.found`);
+                socket.on('stateChange', function (id, state) {
+                    if (!id || !state || !state.ack) return;
+                    if (id.match(/scan\.step$/)) {
+                        if (state.val === 1) {
+                            $('.scan-items').show();
+                            $('#scan_step').html(`1 - ${_('Detecting...')}`);
+                            $('.determinate').css('width', 0);
+                            $('#scan_progress').html(_('%s of %s', 0, $('#scanMax').val()));
+                            $('#scan_found').html('0');
+                        } else if (state.val === 2) {
+                            $('.scan-items').show();
+                            $('#scan_step').html(`2 - ${_('Reading info...')}`);
+                            $('.determinate').css('width', '0%');
+                            $('#scan_progress').html(_('%s of %s', 0, $('#scanMax').val()));
+                        } else {
+                            $('.scan-items').hide();
+                            $('#scan_step').html(_('Done.'));
+                            $('#scan_progress').html('0');
+                            $('.determinate').css('width', '100%');
+                            $('#scan_found').html('0');
+                        }
+                    } else if (id.match(/scan\.progress/)) {
+                        var max = $('#scanMax').val();
+                        var parts = max.split('-');
+                        max = parseInt(parts.pop().trim(), 10);
+                        $('.scan-items').show();
+                        $('#scan_progress').html(_('%s of %s', state.val, max));
+                        if (state.val < 5) {
+                            state.val = 5;
+                        }
+                        if (max < 5) {
+                            max = 5;
+                        }
+                        $('.determinate').css('width', Math.round(((state.val - 5) / (max - 5)) * 100) + '%');
+                    } else if (id.match(/scan\.found/)) {
+                        $('.scan-items').show();
+                        $('#scan_found').html(state.val);
+                    }
+                });
+                $('#scan').on('click', scan);
+                $('#getAll').on('click', readAll);
+
+                getIsAdapterAlive(function (isAlive) {
+                    if (isAlive || common.enabled) {
+                        $('#scan').removeClass('disabled');
+                        $('#getAll').removeClass('disabled');
+                    } else {
+                        $('#scan').addClass('disabled');
+                        $('#getAll').addClass('disabled');
+                    }
+                });
+
+                $('.tabs')
+                    .find('li')
+                    .on('click', function (tab) {
+                        var id = $(this).find('a').attr('href').substring(1);
+                        window.localStorage.setItem('adapter.tab.lcn', id);
+
+                        // manage subscribes
+                        if (id === 'tab-modules' && !$('#getAll').hasClass('disabled')) {
+                            readAll();
+                        }
+                    });
+                var tab = window.localStorage.getItem('adapter.tab.lcn');
+                setTimeout(function () {
+                    var tabs = M.Tabs.getInstance($('.tabs')[0]);
+                    tab && tabs.select(tab);
+                }, 500);
+                $('#scanMax')
+                    .off('change')
+                    .on('change', function () {
+                        window.localStorage.setItem('adapter.tab.lcn.scanMax', $(this).val());
+                    });
+                var scanMax = window.localStorage.getItem('adapter.tab.lcn.scanMax');
+                if (parseInt(scanMax, 10)) {
+                    $('#scanMax').val(parseInt(scanMax, 10));
+                }
+
+                socket.emit('getObject', 'system.meta.uuid', function (err, obj) {
+                    if (obj && obj.native && obj.native.uuid) {
+                        $('#uuid').val(obj.native.uuid);
+                        M.updateTextFields();
+                    }
+                });
+                $('#copyUuid').on('click', function (e) {
+                    copyToClipboard($('#uuid').val(), e);
+                    showToast(null, _('Copied'));
+                });
+
+                // Signal to admin, that no changes yet
+                onChange(false);
+            }
+
+            function save(callback) {
+                var obj = {};
+
+                if ($('#password').val() !== $('#passwordRepeat').val()) {
+                    showMessage(_('Passwords mismatch!'), _('Warning'), 'alert');
+                    return;
+                }
+
+                $('.value').each(function () {
+                    var $this = $(this);
+                    if ($this.attr('type') === 'checkbox') {
+                        obj[$this.attr('id')] = $this.prop('checked');
+                    } else {
+                        obj[$this.attr('id')] = $this.val();
+                    }
+                });
+
+                /*if (obj.password) {
+                obj.password  = encrypt(secret, obj.password);
+            }*/
+
+                callback(obj);
+            }
+        </script>
+        <style>
+            .saving {
+                opacity: 0.3;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- you have to put your config page in a div with id adapter-container -->
+        <div class="m adapter-container">
+            <div class="row">
+                <div class="col s12">
+                    <ul class="tabs">
+                        <li class="tab col s4">
+                            <a
+                                href="#tab-main"
+                                class="translate active"
+                                >Main settings</a
+                            >
+                        </li>
+                        <li class="tab col s4 tab-json">
+                            <a
+                                href="#tab-advanced"
+                                class="translate"
+                                >Advanced settings</a
+                            >
+                        </li>
+                        <li class="tab col s4 tab-json">
+                            <a
+                                href="#tab-modules"
+                                class="translate"
+                                >Modules</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+                <div
+                    id="tab-main"
+                    class="col s12 page"
+                >
+                    <div class="row">
+                        <div class="col s6 m4 l2">
+                            <img
+                                src="lcn.png"
+                                class="logo"
+                                alt="logo"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="host"
+                                type="text"
+                            />
+                            <label
+                                class="translate"
+                                for="host"
+                                >LCN IP</label
+                            >
+                        </div>
+                        <div class="input-field col s4 m2">
+                            <input
+                                class="value"
+                                id="port"
+                                type="number"
+                                min="0"
+                                max="65355"
+                            />
+                            <label
+                                class="translate"
+                                for="port"
+                                >LCN Port</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <select
+                                class="value"
+                                id="analogMode"
+                            >
+                                <option value="1">IoB(0-100%) <=> Adapter(0-100%) <=> LCN (0-50)</option>
+                                <option value="2">IoB(0-100%) <=> Adapter(0-50) <=> LCN (0-50)</option>
+                                <option value="3">IoB(0-100%) <=> Adapter(0-100%) <=> LCN (0-200)</option>
+                                <option value="4">IoB(0-100%) <=> Adapter(0-200) <=> LCN (0-200)</option>
+                            </select>
+                            <label
+                                class="translate"
+                                for="port"
+                                >Analog mode</label
+                            >
+                        </div>
+                        <div class="input-field col s4 m2">
+                            <input
+                                type="checkbox"
+                                id="combinedRelays"
+                                class="value"
+                            />
+                            <span
+                                class="translate"
+                                for="combinedRelays"
+                                >IN/OUT Relays are the same</span
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s10 m2">
+                            <input
+                                class="value"
+                                id="user"
+                                type="text"
+                                autocomplete="new-password"
+                            />
+                            <label
+                                class="translate"
+                                for="user"
+                                >User</label
+                            >
+                        </div>
+                        <div class="input-field col s8 m2">
+                            <input
+                                class="value"
+                                id="password"
+                                autocomplete="new-password"
+                                type="password"
+                            />
+                            <label
+                                class="translate"
+                                for="password"
+                                >Password</label
+                            >
+                        </div>
+                        <div class="input-field col s4 m2">
+                            <input
+                                type="password"
+                                id="passwordRepeat"
+                                autocomplete="new-password"
+                            />
+                            <label
+                                class="translate"
+                                for="passwordRepeat"
+                                >Password repeat</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s2">
+                            <a
+                                class="waves-effect waves-light btn disabled"
+                                id="scan"
+                                ><i class="material-icons left">cloud</i><span class="translate">Scan</span></a
+                            >
+                        </div>
+                        <div class="input-field col s2">
+                            <input
+                                type="text"
+                                id="scanMax"
+                                value="250"
+                            />
+                            <label
+                                class="translate"
+                                for="scanMax"
+                                >Max module for scan</label
+                            >
+                        </div>
+                        <div
+                            class="input-field col s2 scan-items"
+                            style="display: none"
+                        >
+                            <div class="progress">
+                                <div
+                                    class="determinate"
+                                    style="width: 0"
+                                ></div>
+                            </div>
+                            <div><span class="translate">Scan step</span>: <span id="scan_step"></span></div>
+                            <div><span class="translate">Scan progress</span>: <span id="scan_progress"></span></div>
+                            <div><span class="translate">Found</span>: <span id="scan_found"></span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="row"
+                        id="instruction"
+                    >
+                        <div class="col s12 m8">
+                            <span class="translate instructions">instruction</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    id="tab-advanced"
+                    class="col s12 page"
+                >
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="debug"
+                                type="checkbox"
+                            />
+                            <span
+                                class="translate"
+                                for="debug"
+                                >Debug</span
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="readAtStart"
+                                type="checkbox"
+                            />
+                            <span
+                                class="translate"
+                                for="readAtStart"
+                                >Read all states at start</span
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="reconnectTimeout"
+                                type="number"
+                                min="5"
+                            />
+                            <label
+                                class="translate"
+                                for="reconnectTimeout"
+                                >Reconnect interval(sec)</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="connectTimeout"
+                                type="number"
+                                min="200"
+                            />
+                            <label
+                                class="translate"
+                                for="connectTimeout"
+                                >Connect timeout(ms)</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="defaultTimeout"
+                                type="number"
+                                min="200"
+                            />
+                            <label
+                                class="translate"
+                                for="defaultTimeout"
+                                >Response timeout(ms)</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="pingInterval"
+                                type="number"
+                                min="30"
+                            />
+                            <label
+                                class="translate"
+                                for="pingInterval"
+                                >Ping Interval(sec)</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="pingTimeout"
+                                type="number"
+                                min="100"
+                            />
+                            <label
+                                class="translate"
+                                for="pingTimeout"
+                                >Ping response timeout(ms)</label
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8 m4">
+                            <input
+                                class="value"
+                                id="scanResponseTimeout"
+                                type="number"
+                                min="100"
+                            />
+                            <label
+                                class="translate"
+                                for="scanResponseTimeout"
+                                >Scan response timeout(ms)</label
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div
+                    id="tab-modules"
+                    class="col s12 page"
+                >
+                    <div class="row">
+                        <div class="col s6">
+                            <a
+                                class="waves-effect waves-light btn"
+                                id="getAll"
+                                ><i class="material-icons">help</i><span class="translate">Read config</span></a
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 modules"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
