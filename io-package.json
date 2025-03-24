@@ -144,6 +144,11 @@
     "authors": [
       "bluefox <dogafox@gmail.com>"
     ],
+    "plugins": {
+      "sentry": {
+        "dsn": "https://88005a047daff62bc985a1e08ffbc760@sentry.iobroker.net/249"
+      }
+    },
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
