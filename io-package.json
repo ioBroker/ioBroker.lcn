@@ -125,7 +125,9 @@
     "mode": "daemon",
     "icon": "lcn.png",
     "enabled": false,
-    "materialize": true,
+    "adminUI": {
+      "config": "materialize"
+    },
     "messagebox": true,
     "compact": true,
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/admin/lcn.png",
