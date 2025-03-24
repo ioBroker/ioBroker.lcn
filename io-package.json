@@ -29,19 +29,6 @@
     },
     "version": "3.0.0",
     "news": {
-      "3.0.0": {
-        "en": "License was changed to MIT. The adapter is now free of charge.",
-        "de": "Die Lizenz wurde zum MIT geändert. Der Adapter ist jetzt kostenlos.",
-        "ru": "Лицензия была изменена на MIT. Адаптер теперь бесплатный.",
-        "pt": "A licença foi alterada para o MIT. O adaptador agora é gratuito.",
-        "nl": "De licentie is veranderd in MIT. De adapter is nu gratis.",
-        "fr": "La licence a été changée en MIT. L'adaptateur est maintenant gratuit.",
-        "it": "La licenza è stata cambiata in MIT. L'adattatore è ora gratuito.",
-        "es": "La licencia se cambió al MIT. El adaptador es ahora gratuito.",
-        "pl": "Prawo jazdy zostało zmienione na MIT. Adapter jest teraz bezpłatny.",
-        "uk": "Ліцензія змінено до МІТ. Перехідник тепер безкоштовно.",
-        "zh-cn": "执照被改为麻省理工学院。 适配器现在免费."
-      },
       "2.0.3": {
         "en": "Added translations",
         "de": "Übersetzungen hinzugefügt",
