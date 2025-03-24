@@ -9,7 +9,6 @@
 /* jslint node: true */
 
 'use strict';
-const adapterName = require('./package.json').name.split('.').pop();
 const { Adapter } = require('@iobroker/adapter-core'); // Get common adapter utils
 
 const { LCN, SCAN_STEP } = require('./lib/lcn');
@@ -25,7 +24,7 @@ const scan = { step: SCAN_STEP.INACTIVE, progress: 0, found: 0, l: false };
 function startAdapter(options) {
     options = options || {};
     Object.assign(options, {
-        name: adapterName, // adapter name
+        name: 'lcn', // adapter name
     });
 
     adapter = new Adapter(options);
@@ -51,7 +50,7 @@ function startAdapter(options) {
     adapter.on('stateChange', (id, state) => {
         // you can use the ack flag to detect if it is status (true) or command (false)
         if (state && !state.ack) {
-            if (id.startsWith(adapter.namespace + '.S')) {
+            if (id.startsWith(`${adapter.namespace}.S`)) {
                 getObject(id).then(obj => {
                     lcn.control(obj.native.segment, obj.native.module, obj.native.command, obj.native.output, state.val)
                         .then(() => adapter.log.debug('Command sent'))
@@ -135,11 +134,11 @@ function startAdapter(options) {
                     }
                     break;
 
-                case 'getAll':
+                case 'getAll': {
                     const devices = [];
                     for (const id in objects) {
                         if (
-                            !objects.hasOwnProperty(id) ||
+                            !Object.prototype.hasOwnProperty.call(objects, id) ||
                             !objects[id] ||
                             !objects[id].native ||
                             objects[id].type !== 'device'
@@ -151,6 +150,7 @@ function startAdapter(options) {
 
                     obj.callback && adapter.sendTo(obj.from, obj.command, devices, obj.callback);
                     break;
+                }
             }
         }
     });
@@ -200,7 +200,7 @@ function processTasks(adapter, tasks, cb) {
         const task = tasks.shift();
         if (task.name === 'create') {
             adapter.log.info(`Create state ${task.id}`);
-            adapter.setForeignObject(task.id, task.obj, err => {
+            adapter.setForeignObject(task.id, task.obj, () => {
                 objects[task.id] = task.obj;
                 setImmediate(processTasks, adapter, tasks, cb);
             });
@@ -284,7 +284,7 @@ function recalculateRelays(adapter, cb) {
                             obj: {
                                 _id,
                                 common: {
-                                    name: 'Output relay ' + (i + 1),
+                                    name: `Output relay ${i + 1}`,
                                     role: 'switch',
                                     type: 'boolean',
                                     write: true,
@@ -492,9 +492,15 @@ function getObject(id) {
 
 function formatNumber(addr) {
     addr = parseInt(addr, 10);
-    if (addr < 10) return `00${addr}`;
-    if (addr < 100) return `0${addr}`;
-    if (addr > 255) throw new Error(`Invalid address ${addr}`);
+    if (addr < 10) {
+        return `00${addr}`;
+    }
+    if (addr < 100) {
+        return `0${addr}`;
+    }
+    if (addr > 255) {
+        throw new Error(`Invalid address ${addr}`);
+    }
     return addr.toString();
 }
 
@@ -505,9 +511,8 @@ function getAddress(segment, module) {
 function paddingZero(num) {
     if (num < 10) {
         return `0${num}`;
-    } else {
-        return num;
     }
+    return num;
 }
 
 function writeObjs(objs, cb) {
@@ -519,7 +524,7 @@ function writeObjs(objs, cb) {
             if (!oldObj) {
                 objects[`${adapter.namespace}.${obj._id}`] = obj;
 
-                adapter.setObject(obj._id, obj, err => setImmediate(() => writeObjs(objs, cb)));
+                adapter.setObject(obj._id, obj, () => setImmediate(() => writeObjs(objs, cb)));
             } else {
                 objects[oldObj._id] = oldObj;
 
@@ -954,7 +959,7 @@ function processFoundDevices(found, cb, info) {
     info = info || { total: Object.keys(found).length, _new: 0 };
 
     for (const module in found) {
-        if (!found.hasOwnProperty(module) || !found[module]) {
+        if (!Object.prototype.hasOwnProperty.call(found, module) || !found[module]) {
             continue;
         }
 
@@ -973,16 +978,15 @@ function resolveName(segment, module) {
     let id = `${adapter.namespace}.${getAddress(segment, module)}`;
     if (objects[id] && objects[id].common) {
         return objects[id].common.name || '';
-    } else {
-        return `S${formatNumber(segment)}.M${formatNumber(module)}`;
     }
+    return `S${formatNumber(segment)}.M${formatNumber(module)}`;
 }
 
 function readAll(startDelay) {
     startDelay = startDelay || 0;
     const reads = [];
     for (let id in objects) {
-        if (objects.hasOwnProperty(id) && objects[id].type === 'device') {
+        if (Object.prototype.hasOwnProperty.call(objects, id) && objects[id].type === 'device') {
             if (
                 !reads.find(
                     addr => addr.module === objects[id].native.module && addr.segment === objects[id].native.segment,
@@ -1059,7 +1063,7 @@ function updateVariable(id, type, value) {
                 }
             }
         })
-        .catch(err => {
+        .catch(() => {
             // Create objects on the fly if a device is known.
             const parts = id.split('.'); // e.g. lcn.0.S000.M011.VARS.VAR02
             let input = parts.pop(); // remove VAR02
