@@ -134,7 +134,7 @@
     ],
     "licenseInformation": {
       "license": "MIT",
-      "type": "free",
+      "type": "free"
     },
     "readme": "https://github.com/ioBroker/ioBroker.lcn/blob/master/README.md",
     "loglevel": "info",
