@@ -90,7 +90,7 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.0.1 (2025-03-24)
 * (bluefox) License was changed to MIT. The adapter is now free of charge.
 
 ### 2.0.3 (2024-09-04)
