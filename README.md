@@ -90,6 +90,9 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
+
 ### 3.0.1 (2025-03-24)
 * (bluefox) License was changed to MIT. The adapter is now free of charge.
 
