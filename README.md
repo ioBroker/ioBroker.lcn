@@ -157,6 +157,8 @@ After the first start, the devices must be scanned. It can be done in the config
 ### 0.2.1
 * (bluefox) initial release
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 The MIT License (MIT)
 
