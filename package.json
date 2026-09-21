@@ -36,7 +36,7 @@
     "@iobroker/build-tools": "^2.0.15",
     "@iobroker/eslint-config": "^2.1.0",
     "@iobroker/testing": "^5.2.2",
-    "chai": "^4.5.0",
+    "chai": "^6.2.2",
     "mocha": "^11.7.5"
   },
   "main": "main.js",
