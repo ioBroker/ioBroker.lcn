@@ -92,6 +92,7 @@ After the first start, the devices must be scanned. It can be done in the config
 ## Changelog
 
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22.19.0 now
 - (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
 
 ### 3.0.1 (2025-03-24)
