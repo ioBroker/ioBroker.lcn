@@ -47,3 +47,16 @@ describe('CMDS IR and finger sensor', () => {
         assert.strictEqual(finger.module, 5);
     });
 });
+
+describe('Device manager helpers', () => {
+    const { parseSegments } = require('../../build/lib/DeviceManagement');
+
+    it('should parse a list of segments', () => {
+        assert.deepStrictEqual(parseSegments(''), [0]);
+        assert.deepStrictEqual(parseSegments('0'), [0]);
+        assert.deepStrictEqual(parseSegments('0, 5,7; 7 12'), [0, 5, 7, 12]);
+        assert.strictEqual(parseSegments('5-7'), null);
+        assert.strictEqual(parseSegments('256'), null);
+        assert.strictEqual(parseSegments('a'), null);
+    });
+});

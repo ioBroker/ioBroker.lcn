@@ -37,12 +37,13 @@ export interface LcnAdapterApi extends AdapterInstance {
     getLcnDevices(): LcnDevice[];
     isLcnConnected(): boolean;
     /**
-     * Scan the bus
+     * Scan one segment of the bus
      *
      * @param range "max" or "min-max"
+     * @param segment 0 = own segment, otherwise the ID of the segment
      * @param onProgress called on every scan step
      */
-    scanRange(range: string, onProgress?: (progress: ScanProgress) => void): Promise<ScanResultInfo>;
+    scanRange(range: string, segment: number, onProgress?: (progress: ScanProgress) => void): Promise<ScanResultInfo>;
     /** Read the states of all modules. Returns the number of modules */
     readAllStates(): number;
     updateDeviceSettings(id: string, settings: LcnDeviceSettings): Promise<void>;
@@ -52,6 +53,33 @@ export interface LcnAdapterApi extends AdapterInstance {
 const ICONS_DIR = join(__dirname, '..', '..', 'admin', 'icons');
 
 const SCAN_RANGE = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/;
+
+/**
+ * Parse a list of segments like "0, 5, 7"
+ *
+ * @param text list of segments, separated by comma, semicolon or space
+ * @returns the segments (empty text = own segment) or null if the text is invalid
+ */
+export function parseSegments(text: string): number[] | null {
+    const parts = text.split(/[,;\s]+/).filter(part => part);
+    if (!parts.length) {
+        return [0];
+    }
+    const segments: number[] = [];
+    for (const part of parts) {
+        if (!/^\d+$/.test(part)) {
+            return null;
+        }
+        const segment = parseInt(part, 10);
+        if (segment > 255) {
+            return null;
+        }
+        if (!segments.includes(segment)) {
+            segments.push(segment);
+        }
+    }
+    return segments;
+}
 
 export class LcnDeviceManagement extends DeviceManagement<LcnAdapterApi> {
     private readonly iconExists = new Map<string, boolean>();
@@ -197,8 +225,14 @@ export class LcnDeviceManagement extends DeviceManagement<LcnAdapterApi> {
         return { type: 'staticInfo', label, data, xs: 12, sm: 6 };
     }
 
-    /** Scan with a progress dialog */
-    private async scan(context: ActionContext, range: string): Promise<ScanResultInfo | null> {
+    /**
+     * Scan one or more segments with a progress dialog. The segments are scanned one after another.
+     *
+     * @param context action context of the device manager
+     * @param range "max" or "min-max"
+     * @param segments 0 = own segment, otherwise the IDs of the segments
+     */
+    private async scan(context: ActionContext, range: string, segments: number[]): Promise<ScanResultInfo | null> {
         if (!this.adapter.isLcnConnected()) {
             await context.showMessage(t('LCN is not connected'));
             return null;
@@ -211,27 +245,43 @@ export class LcnDeviceManagement extends DeviceManagement<LcnAdapterApi> {
         const max = parseInt(m[2] || m[1], 10);
 
         const progress = await context.openProgress(t('Scan'), { value: 0, label: t('Detecting...') });
-        let info: ScanResultInfo;
-        try {
-            info = await this.adapter.scanRange(range, step => {
-                let update: Parameters<typeof progress.update>[0];
-                if (step.step === SCAN_STEP.SCANNING) {
-                    update = {
-                        indeterminate: false,
-                        value: max ? Math.min(100, Math.round((step.progress / max) * 100)) : 0,
-                        label: t('Detecting module %s of %s, found %s', step.progress, max, step.found),
-                    };
-                } else if (step.step === SCAN_STEP.READING) {
-                    update = { indeterminate: true, label: t('Reading info of module %s...', step.progress) };
-                } else {
-                    return;
-                }
-                progress.update(update).catch(e => this.adapter.log.debug(`Cannot update progress: ${e}`));
-            });
-        } catch (e) {
-            await progress.close();
-            await context.showMessage(t('Cannot scan: %s', String(e)));
-            return null;
+        const info: ScanResultInfo = { total: 0, _new: 0 };
+        for (let i = 0; i < segments.length; i++) {
+            const segment = segments[i];
+            try {
+                const result = await this.adapter.scanRange(range, segment, step => {
+                    let update: Parameters<typeof progress.update>[0];
+                    if (step.step === SCAN_STEP.SCANNING) {
+                        // every segment takes the same part of the progress bar
+                        const part = max ? Math.min(1, step.progress / max) : 0;
+                        update = {
+                            indeterminate: false,
+                            value: Math.round(((i + part) / segments.length) * 100),
+                            label: t(
+                                'Segment %s: detecting module %s of %s, found %s',
+                                segment,
+                                step.progress,
+                                max,
+                                step.found,
+                            ),
+                        };
+                    } else if (step.step === SCAN_STEP.READING) {
+                        update = {
+                            indeterminate: true,
+                            label: t('Segment %s: reading info of module %s...', segment, step.progress),
+                        };
+                    } else {
+                        return;
+                    }
+                    progress.update(update).catch(e => this.adapter.log.debug(`Cannot update progress: ${e}`));
+                });
+                info.total += result.total;
+                info._new += result._new;
+            } catch (e) {
+                await progress.close();
+                await context.showMessage(t('Cannot scan segment %s: %s', segment, String(e)));
+                return null;
+            }
         }
         await progress.close();
         return info;
@@ -248,14 +298,26 @@ export class LcnDeviceManagement extends DeviceManagement<LcnAdapterApi> {
                         help: t('E.g. "250" or "5-30"'),
                         xs: 12,
                     },
+                    segments: {
+                        type: 'text',
+                        label: t('Segments'),
+                        help: t('0 = own segment. Several segments separated by comma, e.g. "0, 5, 7"'),
+                        newLine: true,
+                        xs: 12,
+                    },
                 },
             },
-            { data: { range: '250' }, title: t('Scan'), buttons: ['apply', 'cancel'] },
+            { data: { range: '250', segments: '0' }, title: t('Scan'), buttons: ['apply', 'cancel'] },
         );
         if (!result) {
             return { refresh: false };
         }
-        const info = await this.scan(context, String(result.range ?? ''));
+        const segments = parseSegments(String(result.segments ?? ''));
+        if (!segments) {
+            await context.showMessage(t('Invalid segments "%s"', String(result.segments)));
+            return { refresh: false };
+        }
+        const info = await this.scan(context, String(result.range ?? ''), segments);
         if (!info) {
             return { refresh: false };
         }
@@ -269,7 +331,7 @@ export class LcnDeviceManagement extends DeviceManagement<LcnAdapterApi> {
             return { refresh: 'devices' };
         }
         const module = device.native.module;
-        const info = await this.scan(context, `${module}-${module}`);
+        const info = await this.scan(context, `${module}-${module}`, [device.native.segment]);
         if (!info) {
             return { refresh: 'none' };
         }

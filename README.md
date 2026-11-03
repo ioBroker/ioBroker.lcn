@@ -86,12 +86,14 @@ For every device you can define how many output relays (0-8) must be created (de
 After the first start, the devices must be scanned. Open the "Modules" tab of the configuration dialog and press the scan button (magnifier icon) of the device manager.
 Enter the highest module address that must be scanned (e.g. `250`) or a range like `5-30`.
 
+If the bus has segment couplers, enter the segments that must be scanned, separated by comma (e.g. `0, 5, 7`). `0` is the own segment (the segment the gateway is connected to), all other segments are addressed by their segment ID. The segments are scanned one after another. The modules get the IDs `S<segment>.M<module>`, e.g. `lcn.0.S005.M010`.
+
 Every found module has the following actions:
 - **Module settings** - number of output relays, display and regulators
-- **Scan again** - read name, comment, serial number and states of this module again
+- **Scan again** - read name, comment, serial number and states of this module again (in the segment of the module)
 
 ## Message API
-- `sendTo('lcn.0', 'scan', { max: '250' }, result => ...)` - scan the bus (`max` can be `"max"` or `"min-max"`). Result: `{ total, _new }` or `{ error }`
+- `sendTo('lcn.0', 'scan', { max: '250', segment: 0 }, result => ...)` - scan one segment of the bus (`max` can be `"max"` or `"min-max"`, `segment` is optional: `0` = own segment, otherwise the segment ID). Result: `{ total, _new }` or `{ error }`
 - `sendTo('lcn.0', 'getAll', null, devices => ...)` - list of all modules `[{ id, common, native }]`
 - `lcn.0.scan.manual` - write `*` to read the states of all modules or `S0:6` to read the status of segment 0, module 6
 
@@ -103,6 +105,9 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### **WORK IN PROGRESS**
+- (bluefox) Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)
+
 ### 4.0.0-beta.0 (2026-11-03)
 - (bluefox) Breaking change: Adapter requires admin >= 7.8.23 now
 - (bluefox) The adapter was refactored to TypeScript

@@ -73,6 +73,8 @@ State machine `CONNECTING → WAIT_PROMPT (LCN-PCK/IP) → WAIT_USER → WAIT_PA
 
 `LcnAdapter.processFoundDevices()` then creates/updates the objects (`createModuleObjects()`).
 
+One scan covers one segment. Segment `0` is the own segment (that is what goes over the wire, PCHK answers with `000` too), other segments are addressed by their segment ID. The device manager takes a list of segments (`parseSegments()`) and calls `scanRange(range, segment)` for each one after another; "Scan again" uses the segment of the module. There is no automatic detection of segment couplers: `COMMANDS.REPEATER` exists but its generator (`>M….G003003.SK`) and its detect (`=G…`) do not match the PCK format (`>G003003.SK` → `=Msssaaa.SKnnn`) and it is untested without hardware.
+
 ### Objects
 
 - Device `S<seg:3>.M<mod:3>`, `native` = `LcnDeviceNative` (segment, module, serial, hwType, counts of detected states, and the user settings `relaysOut`, `display`, `regulator`).

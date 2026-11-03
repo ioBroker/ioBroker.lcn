@@ -6,7 +6,7 @@ const { Connection } = require('../../build/lib/connection');
 const silentLogger = { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} };
 
 /**
- * Minimal simulation of LCN-PCHK with one module (segment 0, module 7)
+ * Minimal simulation of LCN-PCHK with module 7 in the own segment (0) and in segment 5
  *
  * @returns {Promise<{server: net.Server, port: number, received: string[], connections: number, push: (line: string) => void}>}
  */
@@ -25,26 +25,36 @@ function startPchk(options = {}) {
                     return ['(0..50-mode percent)'];
                 case '!CHD':
                     return ['(dec-mode)'];
-                case '>M000007.NMN1':
-                    return ['=M000007.N1Kitchen'];
-                case '>M000007.NMN2':
-                    return ['=M000007.N2 main'];
-                case '>M000007.NMK1':
-                    return ['=M000007.K1Comment'];
-                case '>M000007.SN':
-                    return ['=M000007.SN17020F556601FW17020FHW008'];
-                case '>M000007.SMT':
-                    return ['=M000007.TLAAEAABFEAABANVTN'];
-                case '>M000007.SMA':
-                    return [':M000007A1050'];
                 case '>M000007!R8-1------':
                     return ['-M000007!'];
             }
-            const m = line.match(/^>M000007\.MWT(\d+)$/);
-            if (m) {
-                return [`%M000007.A${m[1].padStart(3, '0')}00500`];
+            // module 7 exists in the own segment (0) and in segment 5
+            const m = line.match(/^>M(000|005)007\.(.+)$/);
+            if (!m) {
+                // Everything else (other modules, ...) is not answered
+                return [];
             }
-            // Everything else (other modules, regulators, ...) is not answered
+            const addr = `M${m[1]}007`;
+            const name = m[1] === '000' ? 'Kitchen' : 'Garage';
+            const variable = m[2].match(/^MWT(\d+)$/);
+            if (variable) {
+                return [`%${addr}.A${variable[1].padStart(3, '0')}00500`];
+            }
+            switch (m[2]) {
+                case 'NMN1':
+                    return [`=${addr}.N1${name}`];
+                case 'NMN2':
+                    return [`=${addr}.N2 main`];
+                case 'NMK1':
+                    return [`=${addr}.K1Comment`];
+                case 'SN':
+                    return [`=${addr}.SN17020F556601FW17020FHW008`];
+                case 'SMT':
+                    return [`=${addr}.TLAAEAABFEAABANVTN`];
+                case 'SMA':
+                    return [`:${addr}A1050`];
+            }
+            // regulators, comments 2 and 3, ... are not answered
             return [];
         };
 
@@ -127,6 +137,17 @@ describe('LCN library with simulated PCHK', function () {
         assert.ok(steps.includes(SCAN_STEP.SCANNING));
         assert.ok(steps.includes(SCAN_STEP.READING));
         assert.strictEqual(steps[steps.length - 1], SCAN_STEP.INACTIVE);
+    });
+
+    it('should scan a module in another segment', async () => {
+        const found = await lcn.scanSegment(6, 8, 5);
+        assert.deepStrictEqual(Object.keys(found), ['7']);
+        assert.strictEqual(found[7].name, 'Garage main');
+        assert.strictEqual(found[7].segment, 5);
+        assert.strictEqual(found[7].module, 7);
+        assert.strictEqual(found[7].states.filter(s => s.type === 'VAR').length, 12, 'all 12 variables are collected');
+        assert.ok(found[7].states.every(state => state.segment === 5));
+        assert.ok(sim.received.includes('>M005007.NMN1'));
     });
 
     it('should control a relay', async () => {
