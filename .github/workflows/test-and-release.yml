@@ -27,6 +27,7 @@ jobs:
       - uses: ioBroker/testing-action-check@v2
         with:
           node-version: '24.x'
+          type-checking: true
           lint: true
 
   # Runs adapter tests on all supported node versions and OSes
@@ -45,6 +46,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
+          build: true
 
   # Deploys the final package to NPM
   deploy:
@@ -67,6 +69,7 @@ jobs:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           node-version: '24.x'
+          build: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}

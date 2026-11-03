@@ -126,10 +126,11 @@
     "icon": "lcn.png",
     "enabled": false,
     "adminUI": {
-      "config": "materialize"
+      "config": "json"
     },
     "messagebox": true,
     "compact": true,
+    "nogit": true,
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.lcn/master/admin/lcn.png",
     "keywords": [
       "LCN"
@@ -196,6 +197,11 @@
       {
         "js-controller": ">=6.0.11"
       }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.8.23"
+      }
     ]
   },
   "protectedNative": [
@@ -210,6 +216,7 @@
     "analogMode": 1,
     "reconnectTimeout": 30,
     "connectTimeout": 6000,
+    "scanResponseTimeout": 1000,
     "defaultTimeout": 1000,
     "pingInterval": 300,
     "pingTimeout": 1000,

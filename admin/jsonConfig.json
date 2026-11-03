@@ -1,0 +1,172 @@
+{
+    "i18n": true,
+    "type": "tabs",
+    "items": {
+        "_main": {
+            "type": "panel",
+            "label": "Main settings",
+            "items": {
+                "host": {
+                    "type": "text",
+                    "label": "LCN IP",
+                    "xs": 12,
+                    "sm": 8,
+                    "md": 6,
+                    "lg": 4
+                },
+                "port": {
+                    "type": "number",
+                    "label": "LCN Port",
+                    "min": 1,
+                    "max": 65535,
+                    "xs": 12,
+                    "sm": 4,
+                    "md": 3,
+                    "lg": 2
+                },
+                "analogMode": {
+                    "type": "select",
+                    "label": "Analog mode",
+                    "newLine": true,
+                    "options": [
+                        { "label": "IoB(0-100%) <=> Adapter(0-100%) <=> LCN (0-50)", "value": 1 },
+                        { "label": "IoB(0-100%) <=> Adapter(0-50) <=> LCN (0-50)", "value": 2 },
+                        { "label": "IoB(0-100%) <=> Adapter(0-100%) <=> LCN (0-200)", "value": 3 },
+                        { "label": "IoB(0-100%) <=> Adapter(0-200) <=> LCN (0-200)", "value": 4 }
+                    ],
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4
+                },
+                "combinedRelays": {
+                    "type": "checkbox",
+                    "label": "IN/OUT Relays are the same",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4
+                },
+                "user": {
+                    "type": "text",
+                    "label": "User",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4
+                },
+                "password": {
+                    "type": "password",
+                    "label": "Password",
+                    "repeat": true,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 8
+                }
+            }
+        },
+        "_advanced": {
+            "type": "panel",
+            "label": "Advanced settings",
+            "items": {
+                "debug": {
+                    "type": "checkbox",
+                    "label": "Debug",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4
+                },
+                "readAtStart": {
+                    "type": "checkbox",
+                    "label": "Read all states at start",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4
+                },
+                "reconnectTimeout": {
+                    "type": "number",
+                    "label": "Reconnect interval(sec)",
+                    "min": 5,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "connectTimeout": {
+                    "type": "number",
+                    "label": "Connect timeout(ms)",
+                    "min": 200,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "defaultTimeout": {
+                    "type": "number",
+                    "label": "Response timeout(ms)",
+                    "min": 200,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "pingInterval": {
+                    "type": "number",
+                    "label": "Ping Interval(sec)",
+                    "min": 30,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "pingTimeout": {
+                    "type": "number",
+                    "label": "Ping response timeout(ms)",
+                    "min": 100,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "scanResponseTimeout": {
+                    "type": "number",
+                    "label": "Scan response timeout(ms)",
+                    "min": 100,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                }
+            }
+        },
+        "_modules": {
+            "type": "panel",
+            "label": "Modules",
+            "items": {
+                "_info": {
+                    "type": "staticText",
+                    "text": "The modules are scanned and configured in the device manager below.",
+                    "xs": 12
+                },
+                "_dm": {
+                    "type": "deviceManager",
+                    "newLine": true,
+                    "xs": 12,
+                    "style": {
+                        "width": "100%",
+                        "height": "100%",
+                        "overflow": "hidden"
+                    }
+                }
+            }
+        }
+    }
+}

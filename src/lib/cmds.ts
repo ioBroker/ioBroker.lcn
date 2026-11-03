@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 2018-2024 bluefox <dogafox@gmail.com> CC-BY-NC-4.0
- * Copyright (c) 2025 bluefox <dogafox@gmail.com> MIT
- *
+ * Copyright (c) 2025-2026 bluefox <dogafox@gmail.com> MIT
  */
-'use strict';
-const ACK_ERRORS = {
+/* eslint-disable @typescript-eslint/no-use-before-define -- the parsers use the command names of COMMANDS, which is defined at the end */
+import { ANALOG_MODES } from './analogModes';
+import type { LcnAddress, LcnState } from './types';
+
+export const ACK_ERRORS: Record<number, string> = {
     5: 'Unknown',
     6: 'Number of parameters wrong',
     7: 'Value for parameter wrong',
@@ -21,28 +23,23 @@ const detectLEDs = /^=M(\d\d\d)(\d\d\d)\.TL/;
 const detectNameComment = /^=M(\d\d\d)(\d\d\d)\.[NK]\d/;
 const detectSegmentRepeater = /^=G(\d\d\d)(\d\d\d)\.SK\d\d\d/;
 const detectStatus = /^:M(\d\d\d)(\d\d\d)\.?[ARB]/;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const detectBinaryStatus = /^:M(\d\d\d)(\d\d\d)\.?Bx/;
 const detectSum = /^:M(\d\d\d)(\d\d\d)S\d\d\d\d/;
 const detectIR = /^=M(\d\d\d)(\d\d\d)\.ZI/;
 const detectFingerSensor = /^=M(\d\d\d)(\d\d\d)\.ZT/;
 const detectVariables = /^%M(\d\d\d)(\d\d\d)\.A/; // %M000005.A01000477
 const detectCounters = /^%M(\d\d\d)(\d\d\d)\.C/;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const detectSetValue = /^%M(\d\d\d)(\d\d\d)\.S[12]\d\d\d\d\d$/;
 const detectMeasure = /^%M(\d\d\d)(\d\d\d)\.\d/; // %M000005.65535
 const detectLimits = /^%M(\d\d\d)(\d\d\d)\.T\d\d/; // %M000111.T2401200
 const detectGetSetValues = /^%M(\d\d\d)(\d\d\d)\.S\d\d\d\d\d\d$/; // %M000111.S101200
+const detectSerial = /^=M(\d\d\d)(\d\d\d)\.SN/;
 
-const ANALOG_MODES = require('./analogModes');
-
-const MANUFACTURERS = {
+const MANUFACTURERS: Record<number, string> = {
     1: 'Issendorff',
     3: 'LCNvision (IOS)',
     16: 'BEGA',
 };
 
-const HW_TYPES = {
+const HW_TYPES: Record<number, string> = {
     4: 'CMDS-UP', // UP Module
     6: 'CMDS-PROFIMODUL', // ??
     7: 'CMDS-DI12',
@@ -60,56 +57,66 @@ const HW_TYPES = {
     12: 'CMDS-SK', // Segmentkoppler
     22: 'BEGA-EB2', // ??
 };
-const detectSerial = /^=M(\d\d\d)(\d\d\d)\.SN/;
 
-class CMDS {
+/** Values that can be passed to a command generator (mostly the value of a state) */
+export type CommandArgument = ioBroker.StateValue | undefined;
+
+/** Method syntax keeps the parameters bivariant, so generators with specific parameters fit */
+interface CommandGenerator {
+    generate(address: LcnAddress, ...args: CommandArgument[]): string;
+}
+
+export interface CommandDefinition {
+    name: string;
+    generate: CommandGenerator['generate'] | null;
+    detect: RegExp;
+    parse: (data: string) => LcnState[] | undefined;
+}
+
+export class CMDS {
+    static analogMode: number = ANALOG_MODES.DEFAULT;
+
     /**
      * set analog mode
      *
-     * @param {number} analogMode 1-4
+     * @param analogMode 1-4
      */
-    static setAnalogMode(analogMode) {
+    static setAnalogMode(analogMode: number): void {
         CMDS.analogMode = analogMode;
     }
+
     /** get analog mode */
-    static getAnalogMode() {
+    static getAnalogMode(): number {
         return CMDS.analogMode;
     }
-    static formatNumber(addr) {
-        addr = parseInt(addr, 10);
-        addr = addr.toString().padStart(3, '0');
-        if (addr > 255) {
-            throw new Error(`Invalid address ${addr}`);
+
+    static formatNumber(addr: number | string): string {
+        const num = parseInt(addr.toString(), 10);
+        if (num > 255) {
+            throw new Error(`Invalid address ${num.toString().padStart(3, '0')}`);
         }
-        return addr;
+        return num.toString().padStart(3, '0');
     }
 
-    static getAddress(segment, module, isGroup) {
+    static getAddress(segment: number, module: number, isGroup?: boolean): string {
         return (isGroup ? 'G' : 'M') + CMDS.formatNumber(segment) + CMDS.formatNumber(module);
     }
 
-    // options
-    // {
-    //    segment: int
-    //    module: int
-    //    isGroup: boolean
-    // }
-    //
-    static buildAddress(address, withAck, cmd, payload) {
-        let text = `>${address.isGroup ? 'G' : 'M'}${CMDS.formatNumber(address.segment)}${CMDS.formatNumber(address.module)}${withAck ? '!' : '.'}`;
+    static buildAddress(address: LcnAddress, withAck: boolean, cmd: string, payload?: string): string {
+        const text = `>${address.isGroup ? 'G' : 'M'}${CMDS.formatNumber(address.segment)}${CMDS.formatNumber(address.module)}${withAck ? '!' : '.'}`;
         return text + cmd + (payload !== undefined ? payload : '');
     }
 
     /**
      * Control analog output
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {number} output output number 1-4
-     * @param {number} level 0-100 %
-     * @param {number} time 0-250
+     * @param address address info {segment, module, isGroup}
+     * @param output output number 1-4
+     * @param level 0-100 %
+     * @param time 0-250
      */
-    static buildAnalog(address, output, level, time) {
-        time = time || 0;
+    static buildAnalog(address: LcnAddress, output: number, level: number, time?: number): string {
+        time ||= 0;
         if (level > 100) {
             level = 100;
         }
@@ -135,7 +142,7 @@ class CMDS {
         return CMDS.buildAddress(address, true, `A${output}DI`, CMDS.formatNumber(level) + CMDS.formatNumber(time));
     }
 
-    static parseAck(data) {
+    static parseAck(data: string): LcnState[] {
         // 01234567890123456789012345678901234567890123456
         // -Msssaaa!
         // -Msssaaaddd
@@ -145,31 +152,20 @@ class CMDS {
 
         const ack = data[8];
         if (ack === '!') {
-            return [
-                {
-                    segment,
-                    module,
-                    success: true,
-                },
-            ];
+            return [{ segment, module, success: true }];
         }
         const error = parseInt(ack, 10);
-        return [
-            {
-                segment,
-                module,
-                error: ACK_ERRORS[error] || error,
-            },
-        ];
+        return [{ segment, module, error: ACK_ERRORS[error] || error }];
     }
+
     /**
      * Control binary output
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {number} output output number 1-8
-     * @param {boolean} isOn true/false
+     * @param address address info {segment, module, isGroup}
+     * @param output output number 1-8
+     * @param isOn true/false
      */
-    static buildBinary(address, output, isOn) {
+    static buildBinary(address: LcnAddress, output: number, isOn: boolean): string {
         if (!output) {
             throw new Error('Invalid output number. Allowed 1-8');
         }
@@ -184,34 +180,34 @@ class CMDS {
     /**
      * Control motor output
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {number | string} motor motor number 1-4
-     * @param {number | string} position 0-100
+     * @param address address info {segment, module, isGroup}
+     * @param motor motor number 1-4
+     * @param position 0-100
      */
-    static buildMotor(address, motor, position) {
+    static buildMotor(address: LcnAddress, motor: number | string, position: number | string): string {
         if (!motor) {
             throw new Error('Invalid motor number. Allowed 1-4');
         }
-        motor = parseInt(motor.toString(), 10);
-        position = parseInt(position.toString(), 10);
-        if (motor === 3) {
-            motor = 5;
-        } else if (motor === 4) {
-            motor = 6;
+        let motorNum = parseInt(motor.toString(), 10);
+        let positionNum = parseInt(position.toString(), 10);
+        if (motorNum === 3) {
+            motorNum = 5;
+        } else if (motorNum === 4) {
+            motorNum = 6;
         }
-        if (motor > 8) {
-            motor = 0;
+        if (motorNum > 8) {
+            motorNum = 0;
         }
-        if (position > 100) {
-            position = 100;
+        if (positionNum > 100) {
+            positionNum = 100;
         }
-        if (position < 0) {
-            position = 0;
+        if (positionNum < 0) {
+            positionNum = 0;
         }
-        return CMDS.buildAddress(address, false, `R8M${motor}`, `GO${position}`);
+        return CMDS.buildAddress(address, false, `R8M${motorNum}`, `GO${positionNum}`);
     }
 
-    static parseMotor(data) {
+    static parseMotor(data: string): LcnState[] {
         // 01234567890123456789012345678901234567890123456
         // =Msssaaa.RMxpppllloooooiiiiiRMypppllloooooiiiii
 
@@ -259,11 +255,11 @@ class CMDS {
     /**
      * Control buttons
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {string} tableAndButton XY => X = ABCD - block name, Y = 1-8 - button number
-     * @param {string|number} command 1- short, 2- long, 0- release
+     * @param address address info {segment, module, isGroup}
+     * @param tableAndButton XY => X = ABCD - block name, Y = 1-8 - button number
+     * @param command 1- short, 2- long, 0- release
      */
-    static buildButton(address, tableAndButton, command) {
+    static buildButton(address: LcnAddress, tableAndButton: string, command: number | string): string {
         const table = tableAndButton[0].toUpperCase();
         const button = parseInt(tableAndButton[1], 10);
         if (!table) {
@@ -279,7 +275,7 @@ class CMDS {
         } else if (command === 2 || command === 'long') {
             command = 'L';
         }
-        let abcd;
+        let abcd: string | undefined;
         if (table === 'A') {
             abcd = `${command}--`;
         } else if (table === 'B') {
@@ -293,7 +289,7 @@ class CMDS {
         return CMDS.buildAddress(
             address,
             true,
-            `TS${abcd}`,
+            `TS${String(abcd)}`,
             `${'00000000'.substring(0, button - 1)}1${'00000000'.substring(0, 8 - button)}`,
         );
     }
@@ -301,11 +297,11 @@ class CMDS {
     /**
      * Control LEDs
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {number} led 1-12
-     * @param {string} isOn true/false
+     * @param address address info {segment, module, isGroup}
+     * @param led 1-12
+     * @param isOn true/false
      */
-    static buildLEDs(address, led, isOn) {
+    static buildLEDs(address: LcnAddress, led: number, isOn: boolean): string {
         if (!led) {
             throw new Error('Invalid LED index. Allowed 1-12');
         }
@@ -316,12 +312,13 @@ class CMDS {
     /**
      * Ask LEDs status
      *
-     * @param {object} address address info {segment, module, isGroup}
+     * @param address address info {segment, module, isGroup}
      */
-    static buildGetLEDs(address) {
+    static buildGetLEDs(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMT');
     }
-    static parseLEDs(data) {
+
+    static parseLEDs(data: string): LcnState[] {
         // 012345678901234567890123456
         // =Msssaaa.TLllllllllllllmmmm
         // =M000034.TLAAEAABFEAABANVTN
@@ -332,7 +329,7 @@ class CMDS {
         const status = data.substring(11, data.length - 4);
         // const sum = data.substring(data.length - 4); // ???
 
-        const result = [];
+        const result: LcnState[] = [];
         for (let i = 0; i < status.length; i++) {
             result.push({
                 segment,
@@ -348,14 +345,15 @@ class CMDS {
     /**
      * Ask Name and comment
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {string} type 'name'/'comment'
-     * @param {number} part 1-3
+     * @param address address info {segment, module, isGroup}
+     * @param type 'name'/'comment'
+     * @param part 1-3
      */
-    static buildGetNameComment(address, type, part) {
-        return CMDS.buildAddress(address, false, 'NM', (type === 'name' ? 'N' : 'K') + part);
+    static buildGetNameComment(address: LcnAddress, type: 'name' | 'comment', part: number): string {
+        return CMDS.buildAddress(address, false, 'NM', (type === 'name' ? 'N' : 'K') + part.toString());
     }
-    static parseNameComment(data) {
+
+    static parseNameComment(data: string): LcnState[] {
         // 01234567890123456789012
         // =Msssaaa.ttwwwwwwwwwwww
         // =M000034.N1comment_text
@@ -382,15 +380,13 @@ class CMDS {
     /**
      * Ask serial number
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {string} _type 'name'/'comment'
-     * @param {number} _part 1-3
+     * @param address address info {segment, module, isGroup}
      */
-    static buildGetSerial(address, _type, _part) {
+    static buildGetSerial(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SN');
     }
 
-    static parseSerial(data) {
+    static parseSerial(data: string): LcnState[] {
         // 012345678901234567890123456789012345
         // =Msssaaa.SNnnnnnnnnnnttFWffffffHWhhh
         // =Msssaaa.SN17020F556601FW17020FHW008
@@ -418,19 +414,21 @@ class CMDS {
             },
         ];
     }
+
     /**
      * Ask segment repeater
      *
-     * @param {object} address address info {segment, module, isGroup}
-     * @param {boolean} isAllSegments true - all segments, false only own segment
-     * @param {number} groupID 3, 5-254
+     * @param address address info {segment, module, isGroup}
+     * @param isAllSegments true - all segments, false only own segment
+     * @param groupID 3, 5-254
      */
-    static buildGetSegmentRepeater(address, isAllSegments, groupID) {
-        groupID = groupID || 3;
+    static buildGetSegmentRepeater(address: LcnAddress, isAllSegments: boolean, groupID?: number): string {
+        groupID ||= 3;
 
         return CMDS.buildAddress(address, false, `G${isAllSegments ? '003' : '000'}${CMDS.formatNumber(groupID)}.SK`);
     }
-    static parseSegmentRepeater(data) {
+
+    static parseSegmentRepeater(data: string): LcnState[] {
         // 012345678901234567890123456789012345
         // =Msssaaa.SKnnn
         // =M022005.SK022
@@ -450,24 +448,29 @@ class CMDS {
             },
         ];
     }
+
     /**
      * Ask status
      *
-     * @param {object} address address info {segment, module, isGroup}
+     * @param address address info {segment, module, isGroup}
      */
-    static buildGetStatusAll(address) {
+    static buildGetStatusAll(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMM');
     }
-    static buildGetStatusAnalog(address) {
+
+    static buildGetStatusAnalog(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMA');
     }
-    static buildGetStatusRelay(address) {
+
+    static buildGetStatusRelay(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMR');
     }
-    static buildGetStatusSensor(address) {
+
+    static buildGetStatusSensor(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMB');
     }
-    static parseStatus(data) {
+
+    static parseStatus(data: string): LcnState[] | undefined {
         data = data.replace('.', '');
         // 012345678901234567890123456789012345
         // :MsssaaaAnddd
@@ -483,18 +486,11 @@ class CMDS {
         if (type === 'A') {
             const input = parseInt(data[9], 10);
             const status = parseInt(data.substring(10), 10);
-            return [
-                {
-                    segment,
-                    module,
-                    type: COMMANDS.ANALOG_IN.name,
-                    status,
-                    input,
-                },
-            ];
-        } else if (type === 'R') {
+            return [{ segment, module, type: COMMANDS.ANALOG_IN.name, status, input }];
+        }
+        if (type === 'R') {
             const status = parseInt(data.substring(10), 10);
-            const result = [];
+            const result: LcnState[] = [];
             for (let i = 0; i < 8; i++) {
                 result.push({
                     segment,
@@ -505,9 +501,10 @@ class CMDS {
                 });
             }
             return result;
-        } else if (type === 'B') {
+        }
+        if (type === 'B') {
             const status = parseInt(data.substring(10), 10);
-            const result = [];
+            const result: LcnState[] = [];
             for (let i = 0; i < 8; i++) {
                 result.push({
                     segment,
@@ -518,64 +515,65 @@ class CMDS {
                 });
             }
             return result;
-        } else if (type === 'S') {
+        }
+        if (type === 'S') {
             // :MsssaaaSdrrr - d: number of logic operation (1-4), rrr: 0 - not, 25 - partly, 50 - fully fulfilled
             const input = parseInt(data[9], 10);
             const status = parseInt(data.substring(10), 10);
-            return [
-                {
-                    segment,
-                    module,
-                    type: COMMANDS.SUM.name,
-                    status,
-                    input,
-                },
-            ];
+            return [{ segment, module, type: COMMANDS.SUM.name, status, input }];
         }
+        return undefined;
     }
 
-    static buildGetBinaryStatus(address) {
+    static buildGetBinaryStatus(address: LcnAddress): string {
         return CMDS.buildAddress(address, false, 'SMB');
     }
 
-    static buildGetVariables(address) {
+    static buildGetVariables(address: LcnAddress): string {
         const input = address.input;
         delete address.input;
-        return CMDS.buildAddress(address, false, `MWT${input}`);
+        return CMDS.buildAddress(address, false, `MWT${String(input)}`);
     }
-    static buildGetCounters(address) {
+
+    static buildGetCounters(address: LcnAddress): string {
         const input = address.input;
         delete address.input;
-        return CMDS.buildAddress(address, false, `MWC${input}`);
+        return CMDS.buildAddress(address, false, `MWC${String(input)}`);
     }
-    static buildGetSetValues(address) {
+
+    static buildGetSetValues(address: LcnAddress): string {
         const input = address.input;
         delete address.input;
-        return CMDS.buildAddress(address, false, `MWS${input}`);
+        return CMDS.buildAddress(address, false, `MWS${String(input)}`);
     }
-    static buildGetLimits(address) {
+
+    static buildGetLimits(address: LcnAddress): string {
         const input = address.input;
         delete address.input;
-        return CMDS.buildAddress(address, false, `SE${input}`);
+        return CMDS.buildAddress(address, false, `SE${String(input)}`);
     }
-    static buildSetRegulator(address, output, level) {
+
+    static buildSetRegulator(address: LcnAddress, output: number, level: number): string {
         delete address.input;
         level = 1000 + level * 10;
         return CMDS.buildAddress(
             address,
             false,
-            `RE${output === 1 ? 'A' : 'B'}SSE${parseInt(level, 10).toString().padStart(5, '0')}`,
+            `RE${output === 1 ? 'A' : 'B'}SSE${parseInt(level.toString(), 10).toString().padStart(5, '0')}`,
         );
     }
-    static buildSetRegulatorLock(address, output, lock) {
+
+    static buildSetRegulatorLock(address: LcnAddress, output: number, lock: boolean): string {
         delete address.input;
         return CMDS.buildAddress(address, false, `RE${output === 1 ? 'A' : 'B'}X${lock ? 'S' : 'A'}`);
     }
-    static buildSetDisplay(address, line, part, text) {
+
+    static buildSetDisplay(address: LcnAddress, line: number, part: number, text: string): string {
         delete address.input;
         return CMDS.buildAddress(address, false, `GTDT${line}${part}`, text);
     }
-    static parseLimits(data) {
+
+    static parseLimits(data: string): LcnState[] {
         // 012345678901234567890123456789012345
         // %M000111.T2401200
         const segment = parseInt(data.substring(2, 5), 10);
@@ -584,19 +582,10 @@ class CMDS {
         const input = parseInt(data[10], 10); // register
         const limitNum = parseInt(data[11], 10); // limit number
         const status = parseInt(data.substring(12), 10);
-        return [
-            {
-                segment,
-                module,
-                type: COMMANDS.LIMIT.name,
-                status,
-                input,
-                limit: limitNum,
-            },
-        ];
+        return [{ segment, module, type: COMMANDS.LIMIT.name, status, input, limit: limitNum }];
     }
 
-    static parseVariables(data) {
+    static parseVariables(data: string): LcnState[] | undefined {
         // 012345678901234567890123456789012345
         // %Msssaaa.Annnvvvvv
         // %Msssaaa.Cnnnvvvvv
@@ -615,44 +604,24 @@ class CMDS {
                 status = (status - 1000) / 10;
             }
 
-            return [
-                {
-                    segment,
-                    module,
-                    type: COMMANDS.VAR.name,
-                    status,
-                    input,
-                },
-            ];
-        } else if (type === 'C') {
+            return [{ segment, module, type: COMMANDS.VAR.name, status, input }];
+        }
+        if (type === 'C') {
             // Counter
             const input = parseInt(data.substring(10, 13), 10);
             const status = parseInt(data.substring(13), 10);
-            return [
-                {
-                    segment,
-                    module,
-                    type: COMMANDS.COUNTER.name,
-                    status,
-                    input,
-                },
-            ];
-        } else if (type >= '0' && type <= '9') {
+            return [{ segment, module, type: COMMANDS.COUNTER.name, status, input }];
+        }
+        if (type >= '0' && type <= '9') {
             // measure value
             const value = parseInt(data.substring(9), 10);
-            return [
-                {
-                    segment,
-                    module,
-                    type: COMMANDS.MEASURE.name,
-                    value,
-                },
-            ];
+            return [{ segment, module, type: COMMANDS.MEASURE.name, value }];
         }
         console.log(`Unknown frame: ${data}`);
+        return undefined;
     }
 
-    static parseSetValue(data) {
+    static parseSetValue(data: string): LcnState[] {
         // 012345678901234567890123456789012345
         // %Msssaaa.Scnnnnn
         // %M000111.S101200
@@ -662,28 +631,16 @@ class CMDS {
 
         const input = data[10];
         let status = parseInt(data.substring(11), 10);
-        let lock = !!(status & 0x8000);
+        const lock = !!(status & 0x8000);
         status = status & 0x7fff;
         status = (status - 1000) / 10;
         return [
-            {
-                segment,
-                module,
-                type: COMMANDS.REGULATOR_OUT.name,
-                status,
-                input,
-            },
-            {
-                segment,
-                module,
-                type: COMMANDS.REGULATOR_LOCK_OUT.name,
-                status: lock,
-                input,
-            },
+            { segment, module, type: COMMANDS.REGULATOR_OUT.name, status, input },
+            { segment, module, type: COMMANDS.REGULATOR_LOCK_OUT.name, status: lock, input },
         ];
     }
 
-    static parseLockValue(data) {
+    static parseLockValue(data: string): LcnState[] {
         // 012345678901234567890123456789012345
         // %Msssaaa.Scnnnnn
         // %M000111.S101200
@@ -692,19 +649,11 @@ class CMDS {
         const module = parseInt(data.substring(5, 8), 10);
 
         const input = data[10];
-        let status = !!(parseInt(data.substring(11), 10) & 0x8000);
-        return [
-            {
-                segment,
-                module,
-                type: COMMANDS.REGULATOR.name,
-                status,
-                input,
-            },
-        ];
+        const status = !!(parseInt(data.substring(11), 10) & 0x8000);
+        return [{ segment, module, type: COMMANDS.REGULATOR.name, status, input }];
     }
 
-    static parseIR(data) {
+    static parseIR(data: string): LcnState[] {
         data = data.replace('.', '');
         // 01234567890123456789012345
         // =Msssaaa.ZImmmnnnoookkkaaa
@@ -727,7 +676,7 @@ class CMDS {
         ];
     }
 
-    static parseFingerSensor(data) {
+    static parseFingerSensor(data: string): LcnState[] {
         data = data.replace('.', '');
         // 01234567890123456789012345
         // =Msssaaa.ZTmmmnnnooo
@@ -747,9 +696,7 @@ class CMDS {
     }
 }
 
-CMDS.analogMode = ANALOG_MODES.DEFAULT;
-
-const COMMANDS = {
+export const COMMANDS = {
     ANALOG_OUT: { name: 'ANALOG', generate: CMDS.buildAnalog, detect: detectAck, parse: CMDS.parseAck },
     ANALOG_IN: { name: 'ANALOG', generate: CMDS.buildAnalog, detect: detectAck, parse: CMDS.parseAck },
     SENSOR_IN: { name: 'SENSOR', generate: null, detect: detectAck, parse: CMDS.parseStatus },
@@ -797,10 +744,11 @@ const COMMANDS = {
     IR: { name: 'IR', generate: null, detect: detectIR, parse: CMDS.parseIR },
     FINGER_SCAN: { name: 'FINGER', generate: null, detect: detectFingerSensor, parse: CMDS.parseFingerSensor },
     LIMIT: { name: 'LIMIT', generate: CMDS.buildGetLimits, detect: detectLimits, parse: CMDS.parseLimits },
-};
+} satisfies Record<string, CommandDefinition>;
 
-module.exports = {
-    CMDS,
-    ACK_ERRORS,
-    COMMANDS,
-};
+export type CommandKey = keyof typeof COMMANDS;
+
+/** Find a command definition by its key, e.g. `RELAY_OUT` */
+export function getCommand(key: string): CommandDefinition | undefined {
+    return Object.prototype.hasOwnProperty.call(COMMANDS, key) ? COMMANDS[key as CommandKey] : undefined;
+}
