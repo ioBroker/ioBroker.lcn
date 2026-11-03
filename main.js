@@ -24,7 +24,7 @@ const scan = { step: SCAN_STEP.INACTIVE, progress: 0, found: 0, l: false };
 const INVALID_SUM_ID = /\.SUMS\.SUM[^.]*_undefined$/;
 
 function startAdapter(options) {
-    options = options || {};
+    options ||= {};
     Object.assign(options, {
         name: 'lcn', // adapter name
     });
@@ -41,10 +41,10 @@ function startAdapter(options) {
             if (lcn) {
                 lcn.destroy(callback);
             } else {
-                callback && callback();
+                callback?.();
             }
         } catch {
-            callback && callback();
+            callback?.();
         }
     });
 
@@ -196,8 +196,8 @@ function startAdapter(options) {
 }
 
 function processTasks(adapter, tasks, cb) {
-    if (!tasks || !tasks.length) {
-        cb && cb();
+    if (!tasks?.length) {
+        cb?.();
     } else {
         const task = tasks.shift();
         if (task.name === 'create') {
@@ -518,8 +518,8 @@ function paddingZero(num) {
 }
 
 function writeObjs(objs, cb) {
-    if (!objs || !objs.length) {
-        cb && cb();
+    if (!objs?.length) {
+        cb?.();
     } else {
         const obj = objs.shift();
         adapter.getObject(obj._id, (err, oldObj) => {
@@ -537,8 +537,8 @@ function writeObjs(objs, cb) {
 }
 
 function writeStates(states, cb) {
-    if (!states || !states.length) {
-        cb && cb();
+    if (!states?.length) {
+        cb?.();
     } else {
         const state = states.shift();
 
@@ -669,7 +669,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.ANALOG_IN.name) {
                         return;
                     }
-                    native.analogs = native.analogs || 0;
+                    native.analogs ||= 0;
                     native.analogs++;
                     const stateObj = createAnalogState(device.segment, device.module, device.name, state.input);
                     objs.push(stateObj);
@@ -685,7 +685,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.VAR.name) {
                         return;
                     }
-                    native.vars = native.vars || 0;
+                    native.vars ||= 0;
                     native.vars++;
                     const stateObj = createNumberState(
                         device.segment,
@@ -708,7 +708,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.COUNTER.name) {
                         return;
                     }
-                    native.counters = native.counters || 0;
+                    native.counters ||= 0;
                     native.counters++;
                     const stateObj = createNumberState(
                         device.segment,
@@ -731,7 +731,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.LIMIT.name) {
                         return;
                     }
-                    native.limits = native.limits || 0;
+                    native.limits ||= 0;
                     native.limits++;
                     const stateObj = createNumberState(
                         device.segment,
@@ -754,7 +754,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.REGULATOR_OUT.name) {
                         return;
                     }
-                    native.regulator = native.regulator || 0;
+                    native.regulator ||= 0;
                     native.regulator++;
                     const stateObj = createNumberState(
                         device.segment,
@@ -770,7 +770,7 @@ function createDevice(device) {
             }
             if (device.states && device.states.find(state => state.type === COMMANDS.REGULATOR_LOCK_OUT.name)) {
                 objs.push(createChannel(device.segment, device.module, device.name, COMMANDS.REGULATOR_LOCK_OUT.name));
-                native.regulator = native.regulator || true;
+                native.regulator ||= true;
                 device.states.forEach(state => {
                     if (state.type !== COMMANDS.REGULATOR_LOCK_OUT.name) {
                         return;
@@ -789,13 +789,13 @@ function createDevice(device) {
             }
 
             // process relays
-            if (device.states && device.states.find(state => state.type === COMMANDS.RELAY_IN.name)) {
+            if (device.states?.find(state => state.type === COMMANDS.RELAY_IN.name)) {
                 objs.push(createChannel(device.segment, device.module, device.name, COMMANDS.RELAY_IN.name));
                 device.states.forEach(state => {
                     if (state.type !== COMMANDS.RELAY_IN.name) {
                         return;
                     }
-                    native.relays = native.relays || 0;
+                    native.relays ||= 0;
                     native.relays++;
                     const stateObj = createBooleanState(
                         device.segment,
@@ -824,7 +824,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.LED_IN.name) {
                         return;
                     }
-                    native.leds = native.leds || 0;
+                    native.leds ||= 0;
                     native.leds++;
                     const stateObj = createBooleanState(
                         device.segment,
@@ -886,7 +886,7 @@ function createDevice(device) {
                     if (state.type !== COMMANDS.SENSOR_IN.name) {
                         return;
                     }
-                    native.sensors = native.sensors || 0;
+                    native.sensors ||= 0;
                     native.sensors++;
                     const stateObj = createBooleanState(
                         device.segment,
@@ -958,7 +958,7 @@ function createDevice(device) {
 }
 
 function processFoundDevices(found, cb, info) {
-    info = info || { total: Object.keys(found).length, _new: 0 };
+    info ||= { total: Object.keys(found).length, _new: 0 };
 
     for (const module in found) {
         if (!Object.prototype.hasOwnProperty.call(found, module) || !found[module]) {
@@ -969,23 +969,25 @@ function processFoundDevices(found, cb, info) {
         found[module] = null;
 
         return createDevice(device).then(isNew => {
-            isNew && info._new++;
+            if (isNew) {
+                info._new++;
+            }
             setImmediate(() => processFoundDevices(found, cb, info));
         });
     }
-    cb && cb(info);
+    cb?.(info);
 }
 
 function resolveName(segment, module) {
     let id = `${adapter.namespace}.${getAddress(segment, module)}`;
-    if (objects[id] && objects[id].common) {
+    if (objects[id]?.common) {
         return objects[id].common.name || '';
     }
     return `S${formatNumber(segment)}.M${formatNumber(module)}`;
 }
 
 function readAll(startDelay) {
-    startDelay = startDelay || 0;
+    startDelay ||= 0;
     const reads = [];
     for (let id in objects) {
         if (Object.prototype.hasOwnProperty.call(objects, id) && objects[id].type === 'device') {
@@ -1230,13 +1232,25 @@ function startLCN(adapter) {
 
     lcn.on('update', data => {
         if (data.type === COMMANDS.IR.name) {
-            data.serial !== undefined && adapter.setState('ir.serial', data.serial, true);
-            data.level !== undefined && adapter.setState('ir.level', data.level, true);
-            data.key !== undefined && adapter.setState('ir.key', data.key, true);
-            data.lowbat !== undefined && adapter.setState('ir.lowbat', data.lowbat, true);
-            data.action !== undefined && adapter.setState('ir.action', data.action, true);
+            if (data.serial !== undefined) {
+                adapter.setState('ir.serial', data.serial, true);
+            }
+            if (data.level !== undefined) {
+                adapter.setState('ir.level', data.level, true);
+            }
+            if (data.key !== undefined) {
+                adapter.setState('ir.key', data.key, true);
+            }
+            if (data.lowbat !== undefined) {
+                adapter.setState('ir.lowbat', data.lowbat, true);
+            }
+            if (data.action !== undefined) {
+                adapter.setState('ir.action', data.action, true);
+            }
         } else if (data.type === COMMANDS.FINGER_SCAN.name) {
-            data.serial !== undefined && adapter.setState('finger.code', data.serial, true);
+            if (data.serial !== undefined) {
+                adapter.setState('finger.code', data.serial, true);
+            }
         } else if (
             data.type === COMMANDS.ANALOG_IN.name ||
             data.type === COMMANDS.RELAY_IN.name ||
@@ -1267,15 +1281,21 @@ function startLCN(adapter) {
     lcn.on('scan', newScan => {
         if (scan.step !== newScan.step) {
             scan.step = newScan.step;
-            scan.step !== undefined && adapter.setState('scan.step', scan.step, true);
+            if (scan.step !== undefined) {
+                adapter.setState('scan.step', scan.step, true);
+            }
         }
         if (scan.progress !== newScan.progress) {
             scan.progress = newScan.progress;
-            scan.progress !== undefined && adapter.setState('scan.progress', scan.progress, true);
+            if (scan.progress !== undefined) {
+                adapter.setState('scan.progress', scan.progress, true);
+            }
         }
         if (scan.found !== newScan.found) {
             scan.found = newScan.found;
-            scan.found !== undefined && adapter.setState('scan.found', scan.found, true);
+            if (scan.found !== undefined) {
+                adapter.setState('scan.found', scan.found, true);
+            }
         }
     });
 }
@@ -1287,7 +1307,7 @@ function main(adapter) {
 
     adapter.log.debug('[main] start');
 
-    adapter.config.host = adapter.config.host || '127.0.0.1';
+    adapter.config.host ||= '127.0.0.1';
     adapter.config.port = parseInt(adapter.config.port, 10) || 4114;
     adapter.config.reconnectTimeout = (parseInt(adapter.config.reconnectTimeout, 10) || 30) * 1000; // in seconds
     adapter.config.defaultTimeout = parseInt(adapter.config.defaultTimeout, 10) || 1000;
