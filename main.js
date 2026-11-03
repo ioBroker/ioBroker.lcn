@@ -20,6 +20,8 @@ let connected = false;
 let objects = {};
 let statusReadDone = false;
 const scan = { step: SCAN_STEP.INACTIVE, progress: 0, found: 0, l: false };
+// e.g. lcn.0.S000.M180.SUMS.SUMSUM1000_undefined, created by versions <= 3.0.1
+const INVALID_SUM_ID = /\.SUMS\.SUM[^.]*_undefined$/;
 
 function startAdapter(options) {
     options = options || {};
@@ -1098,7 +1100,7 @@ function updateVariable(id, type, value) {
                             }
                         }
 
-                        if (!objects[`${deviceID}.${type}`]) {
+                        if (!objects[`${deviceID}.${type}S`]) {
                             // create type
                             objs.push(createChannel(device.segment, device.module, name, type));
                         }
@@ -1180,9 +1182,16 @@ function updateVariable(id, type, value) {
                             objs.push(stateObj);
                         }
                         if (objs.length) {
+                            // The created state must have exactly the requested ID,
+                            // otherwise updateVariable would call itself endlessly (see #119)
+                            const stateId = `${adapter.namespace}.${objs[objs.length - 1]._id}`;
+                            if (stateId !== id) {
+                                throw new Error(`Generated object ID ${stateId} does not match`);
+                            }
+
                             deviceChanged && adapter.setForeignObject(deviceObj._id, deviceObj); // update device
 
-                            writeObjs(objs, () => updateVariable(id, type, value).then(() => console.log('added')));
+                            writeObjs(objs, () => updateVariable(id, type, value));
                         } else {
                             throw new Error('Unknown type');
                         }
@@ -1236,7 +1245,8 @@ function startLCN(adapter) {
             data.type === COMMANDS.COUNTER.name ||
             data.type === COMMANDS.REGULATOR_OUT.name ||
             data.type === COMMANDS.REGULATOR_LOCK_OUT.name ||
-            data.type === COMMANDS.LED_IN.name
+            data.type === COMMANDS.LED_IN.name ||
+            data.type === COMMANDS.SUM.name
         ) {
             const id = `${adapter.namespace}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}${paddingZero(data.input)}`;
 
@@ -1246,10 +1256,6 @@ function startLCN(adapter) {
 
             updateVariable(id, data.type, data.status).then(() => {});
         } else if (data.type === COMMANDS.LIMIT.name) {
-            const id = `${adapter.namespace}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}${paddingZero(data.input)}_${paddingZero(data.limit)}`;
-
-            updateVariable(id, data.type, data.status).then(() => {});
-        } else if (data.type === COMMANDS.SUM.name) {
             const id = `${adapter.namespace}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}${paddingZero(data.input)}_${paddingZero(data.limit)}`;
 
             updateVariable(id, data.type, data.status).then(() => {});
@@ -1341,6 +1347,12 @@ function main(adapter) {
 
         for (let i = 0; i < _objects.length; i++) {
             const obj = _objects[i];
+            if (obj && INVALID_SUM_ID.test(obj._id)) {
+                // Remove objects created by the faulty handling of logic operations (see #119)
+                adapter.log.info(`Deleting invalid object ${obj._id}`);
+                adapter.delForeignObject(obj._id, err => err && adapter.log.warn(`Cannot delete ${obj._id}: ${err}`));
+                continue;
+            }
             if (obj && obj.native && obj._id.startsWith(`${adapter.namespace}.S`)) {
                 const addr = getAddress(obj.native.segment, obj.native.module);
                 if (!modules.includes(addr)) {
