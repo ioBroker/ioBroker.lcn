@@ -27,8 +27,21 @@
       "uk": "LCN - Local Control Network",
       "zh-cn": "LCN - Local Control Network"
     },
-    "version": "3.0.1",
+    "version": "3.0.2",
     "news": {
+      "3.0.2": {
+        "en": "Adapter requires node.js >= 22.19.0 now\nAdapter requires js-controller >= 6.0.11 now.\nFixed parsing of logic operation (SUM) status messages. Invalid objects like `SUMS.SUMSUM1000_undefined` were created, and the adapter ran into an endless loop with high CPU load. The invalid objects are deleted on start. New states are `SUMS.SUM01`...`SUMS.SUM04`.\nMigrated the GitHub workflow to the ioBroker testing actions with npm trusted publishing\nRemoved unused dependency `jsonwebtoken` and modernized the code",
+        "de": "Adapter benötigt jetzt node.js >= 22.19.0\nAdapter benötigt jetzt JS-Controller >= 6.0.11.\nDas Analysieren von SUM-Statusmeldungen wurde behoben. Ungültige Objekte wie `sums.sumsum1000_undefined` wurden erzeugt und der Adapter lief in Endlosschleife. Ungültige Objekte werden am Start gelöscht. Neue Staaten sind SUMS.SUM01... `SUMS.SUM04`.\nMigrierte den GitHub-Workflow zu den ioBroker-Testaktionen mit npm\nUnbenutzte Abhängigkeit `jsonwebtoken` entfernt und Code modernisiert",
+        "ru": "Теперь для адаптера требуется файл node.js >= 22.19.0\nТеперь для адаптера требуется js-контроллер >= 6.0.11.\nИсправлен синтаксический анализ сообщений о состоянии логических операций (SUM). Создавались недействительные объекты, такие как `sums.SumSum1000_undefined`, и адаптер работал в бесконечном цикле из-за высокой нагрузки на процессор. Неверные объекты удаляются при запуске. Новые состояния: `SUMS.SUM01`... `СУММА.СУММА 04`.\nПереместил рабочий процесс GitHub в тестовые действия IOBroker с помощью доверенной публикации npm\nУдалена неиспользуемая зависимость `jsonwebtoken` и модернизирован код",
+        "pt": "O adaptador exige node.js >= 22.19.0\nO adaptador exige js-controller >= 6.0.11.\nAnálise fixa de mensagens de status SUM. Objetos inválidos como `sums.sumsum1000_undefined` foram criados e o adaptador entrou em um loop sem fim com alta carga de CPU. Os objetos inválidos são apagados no início. Novos estados são SUMS.SUM01... SUM.SUM04`.\nMigrou o fluxo do GitHub para as ações de teste do IOBroker com npm trusted publishing\nRemoveu a dependência `jsonwebtoken` e modernizou o código",
+        "nl": "Voor de adapter is nu node.js >= 22.19.0 nodig\nVoor de adapter is nu een js-controller >= 6.0.11 nodig.\nHet parseren van statusberichten voor logische bewerkingen (SUM) is opgelost. Er zijn ongeldige objecten gemaakt, zoals `SUMSSUM1000_Undefined`, en de adapter kwam in een eindeloze lus terecht met een hoge CPU-belasting. De ongeldige objecten worden bij het starten verwijderd. De nieuwe staten zijn `SUMS.SUM01`... `SOMS.SUM04`.\nDe GitHub-workflow is overgezet naar de testacties van IOBroker met npm Trusted Publishing\nOngebruikte afhankelijkheid `jsonwebtoken` verwijderd en de code gemoderniseerd",
+        "fr": "Adapter nécessite node.js >= 22.19.0\nAdapter nécessite JS-Controller >= 6.0.11.\nAnalyse des messages d'état des opérations logiques (SUM) a été corrigée. Des objets non valides tels que « Sums.SumSum1000_Undefined » ont été créés et l'adaptateur tournait en boucle avec une charge CPU élevée. Les objets nuls sont supprimés au début. Le nouvel État est « SUMS.SUM01 »... `SUMS.SUM04`.\nJ'ai migré le flux de travail GitHub vers IObroker pour tester les actions avec NPM Trusted Publishing\nSuppression de la dépendance « jsonwebtoken » et modernisé le code",
+        "it": "Adapter richiede node.js >= 22.19.0 ora\nAdapter richiede js-controller >= 6.0.11 ora.\nRisolto il problema con l'analisi dei messaggi di stato SUM. Sono stati creati oggetti non validi come SUMS.SUM1000_UNDEFINED e l'adattatore è in loop infinito. I file non validi sono eliminati all'avvio. I nuovi stati sono SUMS.SUM01... `SUM04`.\nHa migrato il workflow di GitHub alle azioni di test IOBroker con npm trusted publishing\nRimossa la dipendenza «jsonwebtoken» e aggiornato il codice",
+        "es": "El adaptador ahora necesita node.js >= 22.19.0\nEl adaptador ahora requiere js-controller >= 6.0.11.\nAnálisis fijo de los mensajes de estado de la operación lógica (SUM). Se crearon objetos no válidos, como Sums.SumSum1000_undefined, y el adaptador pasó a un bucle sin fin con mucha carga de CPU. Los objetos no válidos se borran al inicio. Los nuevos estados son SUMS.SUM01... `SUM.SUM04`.\nMigró el flujo de trabajo de GitHub a IOBroker probando acciones con npm Trusted Publishing\nEliminó la dependencia no utilizada `jsonwebtoken` y modernizó el código",
+        "pl": "Adapter wymaga teraz node.js >= 22.19.0\nAdapter wymaga teraz kontrolera js->= 6.0.11.\nNaprawiono analizowanie komunikatów o stanie operacji logicznej (SUM). Utworzono nieprawidłowe obiekty, takie jak `Sums.sumsum1000_Undefined`, a adapter wpadł w niekończącą się pętlę z dużym obciążeniem procesora. Nieprawidłowe obiekty są usuwane na początku. Nowe państwa to „SUMS.SUM01”... „SUMS.SUM04”.\nMigracja przepływu pracy GitHub do operacji testowych ioBroker za pomocą zaufanego publikowania npm\nUsunięto nieużywaną zależność `jsonwebtoken` i zmodernizowano kod",
+        "uk": "Адаптер вимагає node.js >= 22.19.0 зараз\nДля адаптера зараз потрібен js-контролер >= 6.0.11.\nВиправлено аналіз повідомлень про стан логічної операції (SUM). Були створені недійсні об'єкти на кшталт `sums.sumSum1000_undefined`, і адаптер потрапив у нескінченний цикл з високим навантаженням процесора. Недійсні об'єкти видаляються під час запуску. Новими станами є `SUMS.SUM01`... `ПІДСУМ.СУМА04`.\nПеренесення робочого процесу GitHub до дій тестування IObroker за допомогою надійної публікації npm\nВилучено невикористану залежність `jsonwebtoken` і модернізовано код",
+        "zh-cn": "适配器现在需要 node.js >= 22.19.0\n适配器现在需要 js-controller >= 6.0.11。\n修复了逻辑操作 (SUM) 状态消息的解析问题。创建了诸如 “sums.sum1000_Undefined” 之类的无效对象，适配器在 CPU 负载过高的情况下陷入了无休止的循环。启动时会删除无效的对象。新州是 SUMS.SUM01...`SUMS.SUM04`。\n使用 npm 可信发布将 GitHub 工作流程迁移到了 ioBroker 测试操作\n移除了未使用的依赖项 “jsonwebtoken” 并对代码进行了现代化改造"
+      },
       "3.0.1": {
         "en": "License was changed to MIT. The adapter is now free of charge.",
         "de": "Die Lizenz wurde zum MIT geändert. Der Adapter ist jetzt kostenlos.",
@@ -106,19 +119,6 @@
         "pl": "Wejście SUM",
         "uk": "Додано введення SUM",
         "zh-cn": "增加特别小组投入"
-      },
-      "1.1.7": {
-        "en": "Corrected setting of undefined values",
-        "de": "Korrigierte Einstellung undefinierter Werte",
-        "ru": "Исправлена настройка неопределенных значений",
-        "pt": "Configuração correta de valores indefinidos",
-        "nl": "Vertaling:",
-        "fr": "Réglage corrigé des valeurs indéfinies",
-        "it": "Impostazione corretta dei valori non definiti",
-        "es": "Ajuste corregido de valores indefinidos",
-        "pl": "Poprawienie nieokreślonych wartości",
-        "uk": "Виправлено налаштування не визначених значень",
-        "zh-cn": "B. 纠正未界定的价值观"
       }
     },
     "platform": "Javascript/Node.js",
