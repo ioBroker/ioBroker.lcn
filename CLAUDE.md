@@ -88,7 +88,11 @@ State machine `CONNECTING → WAIT_PROMPT (LCN-PCK/IP) → WAIT_USER → WAIT_PA
 
 ### Known quirks kept on purpose
 
-Marked with `(sic)` in the code. They are kept so the translation to TypeScript did not change behavior; fix them in separate commits and mention them in the changelog.
+Marked with `(sic)` in the code. They were kept when the code was translated to TypeScript, so the behavior did not change. Fix them in separate commits and mention them in the changelog. Still open:
+
+- `LCN.read(..., 'SE')` uses `COMMANDS.SETTING`, which does not exist. It cannot be reached, because the regex of `scan.manual` captures only one character for the operation.
+- `connection.commandPromise()` rejects with plain strings (`'timeout'`), callers compare them.
+- IR / finger sensor: `serial` is `substring(11, 20)` after the dot was removed. That looks off by one compared to the format comment, but it is not verified with real data. Do not change it without a log from a real installation.
 
 ### Misc conventions
 

@@ -107,6 +107,12 @@ Every found module has the following actions:
 - (bluefox) Breaking change: Adapter requires admin >= 7.8.23 now
 - (bluefox) The adapter was refactored to TypeScript
 - (bluefox) The configuration dialog was migrated to JsonConfig. The modules are scanned and configured in the device manager
+- (bluefox) Fixed: the adapter reconnected to LCN after it was stopped and did not finish the stop correctly
+- (bluefox) Fixed: `ir.lowbat` was never set
+- (bluefox) Fixed: finger sensor codes were written into `ir.serial` instead of `finger.code`
+- (bluefox) Fixed: a failed authentication on LCN-PCHK was not recognized
+- (bluefox) Fixed: regulator states of scanned modules were recreated on every change of the device object
+- (bluefox) Fixed: writing a state, whose object cannot be read, could crash the adapter
 
 
 ### 3.0.2 (2026-11-03)

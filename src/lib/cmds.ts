@@ -689,7 +689,7 @@ export class CMDS {
             {
                 segment,
                 module,
-                type: COMMANDS.IR.name,
+                type: COMMANDS.FINGER_SCAN.name,
                 serial: data.substring(11, 20),
             },
         ];
