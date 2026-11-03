@@ -105,6 +105,9 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### **WORK IN PROGRESS**
+- (bluefox) Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer
+
 ### 4.0.0-beta.1 (2026-11-03)
 - (bluefox) Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)
 

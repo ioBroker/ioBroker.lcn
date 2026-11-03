@@ -544,6 +544,11 @@ export class Connection extends EventEmitter {
             this._send(cmd.cmd)
                 .then(() => this.debug && this.logger.debug(`[CONN] command sent (no callback): ${cmd.cmd}`))
                 .catch(e => this._onError(e, true));
+            // A command without callback does not wait for an answer, so continue with the next one.
+            // Before 4.0.0 the queue stopped here, if more commands were waiting behind a command with callback
+            if (this.requests.length) {
+                setImmediate(() => this._processCommands());
+            }
         }
     }
 
