@@ -103,7 +103,7 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0-beta.0 (2026-11-03)
 - (bluefox) Breaking change: Adapter requires admin >= 7.8.23 now
 - (bluefox) The adapter was refactored to TypeScript
 - (bluefox) The configuration dialog was migrated to JsonConfig. The modules are scanned and configured in the device manager
@@ -113,7 +113,6 @@ Every found module has the following actions:
 - (bluefox) Fixed: a failed authentication on LCN-PCHK was not recognized
 - (bluefox) Fixed: regulator states of scanned modules were recreated on every change of the device object
 - (bluefox) Fixed: writing a state, whose object cannot be read, could crash the adapter
-
 
 ### 3.0.2 (2026-11-03)
 - (copilot) Adapter requires node.js >= 22.19.0 now
@@ -130,9 +129,6 @@ Every found module has the following actions:
 
 ### 2.0.2 (2024-09-03)
 * (bluefox) Corrected checking of licenses with license manager
-
-### 2.0.1 (2024-08-07)
-* (bluefox) Disable possibility to install via git
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
