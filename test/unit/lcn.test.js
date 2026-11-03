@@ -177,8 +177,8 @@ describe('LCN library with simulated PCHK', function () {
             vars.map(s => [s.input, s.status]),
             [
                 [1, 1205],
-                [2, 18],
-                [3, 19],
+                [2, 1180],
+                [3, 1190],
             ],
         );
         const regulators = module.states.filter(s => s.type === 'REGULATOR_OUT' || s.type === 'REGULATOR_LOCK_OUT');
@@ -254,8 +254,8 @@ describe('LCN library with simulated PCHK', function () {
             updates.filter(s => s.type === 'VAR').map(s => [s.input, s.status]),
             [
                 [1, 1205],
-                [2, 18],
-                [3, 19],
+                [2, 1180],
+                [3, 1190],
             ],
         );
         assert.strictEqual(updates.filter(s => s.type === 'REGULATOR_OUT').length, 2);

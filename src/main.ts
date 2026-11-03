@@ -5,6 +5,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { LCN, SCAN_STEP } from './lib/lcn';
 import { COMMANDS } from './lib/cmds';
+import { convertVariable } from './lib/variables';
 import {
     LcnDeviceManagement,
     type LcnAdapterApi,
@@ -368,17 +369,28 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
     private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
         if (id && obj) {
             const oldObj = this.objects[id];
-            if (oldObj && id.match(/\.VARS\.VAR\d\d$/)) {
-                // if role was defined
-                if (obj.common?.role && oldObj.common && !oldObj.common.role) {
-                    // recalculate values. The new object is in the cache when the state is read
-                    this.getStateAsync(id)
-                        .then(state => {
-                            if (state && state.val !== null && state.val !== undefined) {
-                                return this.updateVariable(id, COMMANDS.VAR.name, state.val);
-                            }
-                        })
-                        .catch(e => this.log.error(`Cannot recalculate ${id}: ${e}`));
+            if (
+                oldObj?.common &&
+                obj.type === 'state' &&
+                obj.native?.command === COMMANDS.VAR.name &&
+                obj.common?.role !== oldObj.common.role
+            ) {
+                // The role defines the conversion of the variable: read the raw value again from the module.
+                // Before 4.0.0 the current (already converted) value was converted again, and only if
+                // the object had no role before.
+                const native = obj.native as LcnStateNative;
+                const input = parseInt(String(native.output), 10);
+                const device = this.objects[`${this.namespace}.${getAddress(native.segment, native.module)}`];
+                if (input && this.lcn?.isConnected()) {
+                    // The new object is in the cache, when the answer arrives
+                    this.lcn
+                        .readVariables(
+                            native.segment,
+                            native.module,
+                            [input],
+                            !!(device?.native as LcnDeviceNative | undefined)?.typelessVars,
+                        )
+                        .catch(e => this.log.warn(`Cannot read ${id}: ${e}`));
                 }
             }
             if (obj.type === 'device') {
@@ -736,6 +748,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         const isNew = !obj;
         const objs: NewObject[] = [];
         const states: StateToWrite[] = [];
+        /** Values of the variables, they must be converted depending on the role */
+        const variables: StateToWrite[] = [];
         const native: Partial<Record<keyof LcnDeviceNative, number | boolean>> = {};
         const deviceStates = device.states || [];
 
@@ -771,7 +785,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                 count('vars');
                 const stateObj = createNumberState(segment, module, device.name, COMMANDS.VAR.name, state.input, true);
                 objs.push(stateObj);
-                states.push({ id: stateObj._id, val: state.status });
+                // raw value, converted by updateVariable depending on the role of the (maybe existing) state
+                variables.push({ id: stateObj._id, val: state.status });
             });
         }
 
@@ -1004,6 +1019,11 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
 
         await this.writeObjs(objs);
         await this.writeStates(states);
+        for (const variable of variables) {
+            if (variable.val !== undefined) {
+                await this.updateVariable(`${this.namespace}.${variable.id}`, COMMANDS.VAR.name, variable.val);
+            }
+        }
         return isNew;
     }
 
@@ -1151,31 +1171,13 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         }
 
         try {
-            const role: string | undefined = obj.common.role;
-            if (type === COMMANDS.VAR.name && role) {
-                let unit: string | undefined;
-                if (role.match(/^value\.temperature/)) {
-                    value = (Number(value) - 1000) / 10;
-                    unit = '°C';
-                } else if (role.match(/^value\.brightness/)) {
-                    // value = Math.round(Math.exp(1.689646994 + 0.010380664 * value) * 10) / 10;
-                    value = Math.round(Math.exp(Number(value) / 100) * 10) / 10;
-                    unit = 'lux';
-                } else if (role.match(/^value\.speed\.wind/)) {
-                    value = Number(value) / 10;
-                    unit = 'm/s';
-                } else if (role.match(/^value\.voltage/)) {
-                    value = Number(value) / 400;
-                    unit = 'V';
-                } else if (role.match(/^value\.current/)) {
-                    value = Number(value) / 10 - 100;
-                    unit = 'A';
-                } else if (role.match(/^value\.sun\.azimuth/) || role.match(/^value\.sun\.elevation/)) {
-                    value = Number(value) / 10 - 100;
-                    unit = '°';
-                }
-                if (unit && !obj.common.unit) {
-                    obj.common.unit = unit;
+            if (type === COMMANDS.VAR.name && typeof value === 'number' && !isNaN(value)) {
+                // The value is raw, the conversion depends on the role of the state
+                const input = parseInt(String((obj.native as LcnStateNative | undefined)?.output), 10);
+                const converted = convertVariable(value, obj.common.role, input);
+                value = converted.value;
+                if (converted.unit && !obj.common.unit) {
+                    obj.common.unit = converted.unit;
                     await this.setForeignObjectAsync(id, obj);
                 }
             }

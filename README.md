@@ -42,6 +42,8 @@ To apply the valid convert functions to variables, the variables must have the v
 - **value.sun.azimuth** - sun azimuth
 - **value.sun.elevation** - sun elevation
 
+Without one of these roles the raw value is shown. Exception: `VAR02` and `VAR03` (usually R1Var and R2Var of the regulators) are shown in °C, as in the versions before. When the role of a variable is changed, the adapter reads its value again from the module.
+
 Modules with a firmware before 170206 have only 3 variables (TVar, R1Var, R2Var). They are created as `VARS.VAR01`-`VARS.VAR03`. Modules, that were scanned with an older version of the adapter, must be scanned again ("Scan again" in the device manager), so the adapter detects the firmware.
 
 The modules send the values of the variables not always by themselves. The option "Read variables every (min)" in the advanced settings reads the variables of all modules cyclically (`0` = off). The variables are read one after another, so with many modules one cycle can take some time.
@@ -110,6 +112,11 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### **WORK IN PROGRESS**
+- (bluefox) Fixed: `VAR02` and `VAR03` were converted twice, if a role like `value.temperature` was set. Without such a role they are still shown in °C
+- (bluefox) Fixed: the scan wrote the values of the variables without the conversion of their role
+- (bluefox) The value of a variable is read again from the module, when its role is changed
+
 ### 4.0.0-beta.2 (2026-11-03)
 - (bluefox) Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer
 - (bluefox) Fixed: variables of modules with a firmware before 170206 (only 3 variables) were not created. These modules must be scanned again (#22)

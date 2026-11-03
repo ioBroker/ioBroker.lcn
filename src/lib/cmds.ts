@@ -690,11 +690,9 @@ export class CMDS {
         if (type === 'A') {
             // variables
             const input = parseInt(data.substring(10, 13), 10);
-            let status = parseInt(data.substring(13), 10);
-
-            if (input === 2 || input === 3) {
-                status = (status - 1000) / 10;
-            }
+            // The raw value. The adapter converts it depending on the role of the state (convertVariable).
+            // Before 4.0.0 VAR2 and VAR3 were converted to °C here, so a role converted them a second time
+            const status = parseInt(data.substring(13), 10);
 
             return [{ segment, module, type: COMMANDS.VAR.name, status, input }];
         }
