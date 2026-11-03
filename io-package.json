@@ -224,7 +224,8 @@
     "password": "",
     "debug": false,
     "readAtStart": true,
-    "combinedRelays": true
+    "combinedRelays": true,
+    "varPollInterval": 0
   },
   "objects": [],
   "instanceObjects": [

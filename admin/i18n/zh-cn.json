@@ -57,5 +57,7 @@
     "Max module for scan": "要扫描的最高模块地址",
     "E.g. \"250\" or \"5-30\"": "例如 \"250\"（模块 3-250）或范围 \"5-30\"",
     "Found %s devices, new of them %s devices.": "找到 %s 个模块，其中新模块：%s 个。",
-    "Module %s did not answer": "模块 %s 没有响应"
+    "Module %s did not answer": "模块 %s 没有响应",
+    "Read variables every (min)": "读取变量间隔（分钟）",
+    "0 = off. The variables of all modules are read one after another": "0 = 关闭。依次读取所有模块的变量"
 }

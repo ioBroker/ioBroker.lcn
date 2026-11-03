@@ -57,5 +57,7 @@
     "Max module for scan": "Hoogste moduleadres om te scannen",
     "E.g. \"250\" or \"5-30\"": "Bijv. \"250\" (modules 3-250) of een bereik zoals \"5-30\"",
     "Found %s devices, new of them %s devices.": "%s module(s) gevonden, waarvan nieuw: %s.",
-    "Module %s did not answer": "Module %s heeft niet geantwoord"
+    "Module %s did not answer": "Module %s heeft niet geantwoord",
+    "Read variables every (min)": "Variabelen lezen elke (min)",
+    "0 = off. The variables of all modules are read one after another": "0 = uit. De variabelen van alle modules worden na elkaar gelezen"
 }

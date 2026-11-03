@@ -144,6 +144,17 @@
                     "sm": 6,
                     "md": 4,
                     "lg": 3
+                },
+                "varPollInterval": {
+                    "type": "number",
+                    "label": "Read variables every (min)",
+                    "help": "0 = off. The variables of all modules are read one after another",
+                    "min": 0,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
                 }
             }
         },

@@ -33,6 +33,18 @@ const detectLimits = /^%M(\d\d\d)(\d\d\d)\.T\d\d/; // %M000111.T2401200
 const detectGetSetValues = /^%M(\d\d\d)(\d\d\d)\.S\d\d\d\d\d\d$/; // %M000111.S101200
 const detectSerial = /^=M(\d\d\d)(\d\d\d)\.SN/;
 
+/**
+ * Modules with an older firmware know only 3 variables (TVar, R1Var, R2Var). They are requested with other
+ * commands (MWV, MWTA, MWTB) and the answer contains no variable number: `%Msssaaa.vvvvv`. The same is valid
+ * for the set values of the regulators (MWSA, MWSB). See `request_var_status` of pypck.
+ */
+export const FIRMWARE_TYPED_VARIABLES = 0x170206;
+
+/** Commands to request the variables 1-3 of modules with firmware before 170206 */
+const TYPELESS_VARIABLE_COMMANDS = ['MWV', 'MWTA', 'MWTB'];
+/** Commands to request the regulator set values 1-2 of modules with firmware before 170206 */
+const TYPELESS_SET_VALUE_COMMANDS = ['MWSA', 'MWSB'];
+
 const MANUFACTURERS: Record<number, string> = {
     1: 'Issendorff',
     3: 'LCNvision (IOS)',
@@ -399,6 +411,10 @@ export class CMDS {
         const fwVersionYear = parseInt(data.substring(25, 27), 10);
         const fwVersionMonth = parseInt(data.substring(27, 29), 16);
         const fwVersionDate = parseInt(data.substring(29, 31), 16);
+        // the firmware as number, e.g. 0x17020F. Used to decide which commands the module understands
+        const fwSerial = /^[0-9A-F]{6}$/i.test(data.substring(25, 31))
+            ? parseInt(data.substring(25, 31), 16)
+            : undefined;
         const hwType = parseInt(data.substring(33), 10);
 
         return [
@@ -411,6 +427,7 @@ export class CMDS {
                 manufacturer: MANUFACTURERS[manufacturer] || manufacturer,
                 hwType: HW_TYPES[hwType] || hwType,
                 fwVersion: `${fwVersionYear < 50 ? 20 : 19}${fwVersionYear < 10 ? `0${fwVersionYear}` : fwVersionYear}.${fwVersionMonth < 10 ? `0${fwVersionMonth}` : fwVersionMonth}.${fwVersionDate < 10 ? `0${fwVersionDate}` : fwVersionDate}`,
+                fwSerial,
             },
         ];
     }
@@ -545,6 +562,81 @@ export class CMDS {
         const input = address.input;
         delete address.input;
         return CMDS.buildAddress(address, false, `MWS${String(input)}`);
+    }
+
+    /**
+     * Request a variable of a module with firmware before 170206
+     *
+     * @param address address info {segment, module}
+     * @param input variable 1-3 (TVar, R1Var, R2Var)
+     */
+    static buildGetVariableTypeless(address: LcnAddress, input: number): string {
+        delete address.input;
+        const cmd = TYPELESS_VARIABLE_COMMANDS[input - 1];
+        if (!cmd) {
+            throw new Error(`Modules with firmware before 170206 have no variable ${input}`);
+        }
+        return CMDS.buildAddress(address, false, cmd);
+    }
+
+    /**
+     * Request a regulator set value of a module with firmware before 170206
+     *
+     * @param address address info {segment, module}
+     * @param input regulator 1-2
+     */
+    static buildGetSetValueTypeless(address: LcnAddress, input: number): string {
+        delete address.input;
+        const cmd = TYPELESS_SET_VALUE_COMMANDS[input - 1];
+        if (!cmd) {
+            throw new Error(`Modules with firmware before 170206 have no regulator ${input}`);
+        }
+        return CMDS.buildAddress(address, false, cmd);
+    }
+
+    /**
+     * Answer to the request of one variable (firmware since 170206): %Msssaaa.Annnvvvvv
+     *
+     * @param segment segment address
+     * @param module module address
+     * @param input variable 1-12
+     */
+    static detectVariable(segment: number, module: number, input: number): RegExp {
+        return new RegExp(
+            `^%M${CMDS.formatNumber(segment)}${CMDS.formatNumber(module)}\\.A${input.toString().padStart(3, '0')}\\d`,
+        );
+    }
+
+    /**
+     * Answer of a module with firmware before 170206 without the number of the variable: %Msssaaa.vvvvv
+     *
+     * @param segment segment address
+     * @param module module address
+     */
+    static detectTypeless(segment: number, module: number): RegExp {
+        return new RegExp(`^%M${CMDS.formatNumber(segment)}${CMDS.formatNumber(module)}\\.\\d+$`);
+    }
+
+    /**
+     * Parse the answer to `buildGetVariableTypeless`. The number of the variable is known only from the request
+     *
+     * @param data e.g. %M000009.01205
+     * @param input variable 1-3, that was requested
+     */
+    static parseTypelessVariable(data: string, input: number): LcnState[] | undefined {
+        // %Msssaaa.vvvvv => %Msssaaa.Annnvvvvv
+        return CMDS.parseVariables(`${data.substring(0, 9)}A${input.toString().padStart(3, '0')}${data.substring(9)}`);
+    }
+
+    /**
+     * Parse the answer to `buildGetSetValueTypeless`. The number of the regulator is known only from the request
+     *
+     * @param data e.g. %M000009.01210
+     * @param input regulator 1-2, that was requested
+     */
+    static parseTypelessSetValue(data: string, input: number): LcnState[] {
+        // %Msssaaa.vvvvv => %Msssaaa.Snvvvvv
+        return CMDS.parseSetValue(`${data.substring(0, 9)}S${input}${data.substring(9)}`);
     }
 
     static buildGetLimits(address: LcnAddress): string {

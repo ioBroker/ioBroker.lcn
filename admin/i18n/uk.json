@@ -57,5 +57,7 @@
     "Max module for scan": "Найвища адреса модуля для сканування",
     "E.g. \"250\" or \"5-30\"": "Наприклад, \"250\" (модулі 3-250) або діапазон \"5-30\"",
     "Found %s devices, new of them %s devices.": "Знайдено модулів: %s, з них нових: %s.",
-    "Module %s did not answer": "Модуль %s не відповів"
+    "Module %s did not answer": "Модуль %s не відповів",
+    "Read variables every (min)": "Опитувати змінні кожні (хв)",
+    "0 = off. The variables of all modules are read one after another": "0 = вимкнено. Змінні всіх модулів опитуються по черзі"
 }

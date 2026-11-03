@@ -26,6 +26,8 @@ export interface LcnState {
     manufacturer?: string | number;
     hwType?: string | number;
     fwVersion?: string;
+    /** Firmware as number, e.g. 0x17020F */
+    fwSerial?: number;
     segmentId?: number;
     value?: number;
     level?: number;
@@ -45,6 +47,10 @@ export interface FoundModule {
     manufacturer?: string | number;
     hwType?: string | number;
     fwVersion?: string;
+    /** Firmware as number, e.g. 0x17020F */
+    fwSerial?: number;
+    /** The module answers to variable requests without the number of the variable (firmware before 170206) */
+    typelessVars?: boolean;
     segment?: number;
     module?: number;
 }
@@ -71,6 +77,13 @@ export interface LcnDeviceNative {
     module: number;
     serial?: string;
     fwVersion?: string;
+    /** Firmware as number, e.g. 0x17020F. Detected by the scan since 4.0.0 */
+    fwSerial?: number;
+    /**
+     * The module knows only 3 variables and answers without their number (firmware before 170206).
+     * Detected by the scan since 4.0.0
+     */
+    typelessVars?: boolean;
     hwType?: string | number;
     manufacturer?: string | number;
     name?: string;
