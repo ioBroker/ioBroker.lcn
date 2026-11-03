@@ -60,7 +60,7 @@ There is deliberately **no `prepare` script** — `npm ci`/`npm install` does no
 State machine `CONNECTING → WAIT_PROMPT (LCN-PCK/IP) → WAIT_USER → WAIT_PASS → WAIT_AUTH_OK → WAIT_CONNECTED ($io:#LCN:connected) → READY`. After connect it sets the analog mode and the decimal mode (`!CHD`), then emits `connected`.
 
 - Commands **with callback** are strictly serialized: one command is in flight (`WAIT_RESPONSE`), it waits for its `regAnswer` or times out. Lines that do not answer the current command are emitted as `data`. Commands **without callback** are sent and the queue continues immediately (before 4.0.0 the queue got stuck when several of them waited behind a command with callback).
-- `ignoreTimeoutError` resolves with `undefined` instead of rejecting — used by the scan for optional answers.
+- `ignoreTimeoutError` resolves with `undefined` instead of rejecting — used by the scan for optional answers. `LCN.requestOptional()` also turns error answers into `undefined`.
 - Ping (`^ping<n>`) every `pingInterval`; a missing/mismatched answer reconnects.
 - `destroy(isReconnect, cb)`: with `isReconnect` it schedules a reconnect after `reconnectTimeout`.
 - The library uses its **own timers** (not `this.setTimeout` of the adapter) so it stays usable without an adapter; `destroy()` clears all of them.
@@ -73,11 +73,17 @@ State machine `CONNECTING → WAIT_PROMPT (LCN-PCK/IP) → WAIT_USER → WAIT_PA
 
 `LcnAdapter.processFoundDevices()` then creates/updates the objects (`createModuleObjects()`).
 
+### Firmware before 170206 (#22)
+
+Modules with a firmware before `0x170206` (`FIRMWARE_TYPED_VARIABLES`, taken from the `FW` part of the `SN` answer, stored as `native.fwSerial`) know only 3 variables. They are requested with `MWV`/`MWTA`/`MWTB` (→ `VAR01-03`), the regulator set values with `MWSA`/`MWSB`, and the answer `%Msssaaa.vvvvv` contains **no number** — it is assigned to the requested variable, so these requests must run strictly one after another (`LCN.requestTypeless()`, module specific regex `CMDS.detectTypeless()`). Reference: `request_var_status` / `has_type_in_response` of pypck. The scan sets `native.typelessVars`; if the module answers neither `SN` nor `MWT`, the scan tries the old commands too. Unrequested typeless lines are parsed as `MEASURE` and ignored by the adapter. Not verified with real hardware.
+
+`LCN.readVariables(segment, module, inputs, typeless)` requests variables one by one and emits `update`s. It is used by the status read of typeless modules, `scan.manual` `S0:20:V` and the cyclic read (`config.varPollInterval` in minutes, `LcnAdapter.readVariablesCyclic()`, skipped while a scan or status read runs).
+
 One scan covers one segment. Segment `0` is the own segment (that is what goes over the wire, PCHK answers with `000` too), other segments are addressed by their segment ID. The device manager takes a list of segments (`parseSegments()`) and calls `scanRange(range, segment)` for each one after another; "Scan again" uses the segment of the module. There is no automatic detection of segment couplers: `COMMANDS.REPEATER` exists but its generator (`>M….G003003.SK`) and its detect (`=G…`) do not match the PCK format (`>G003003.SK` → `=Msssaaa.SKnnn`) and it is untested without hardware.
 
 ### Objects
 
-- Device `S<seg:3>.M<mod:3>`, `native` = `LcnDeviceNative` (segment, module, serial, hwType, counts of detected states, and the user settings `relaysOut`, `display`, `regulator`).
+- Device `S<seg:3>.M<mod:3>`, `native` = `LcnDeviceNative` (segment, module, serial, hwType, `fwSerial`, `typelessVars`, counts of detected states, and the user settings `relaysOut`, `display`, `regulator`).
 - States `S000.M010.<NAME>S.<NAME><nn>` (e.g. `ANALOGS.ANALOG01`, `RELAYS.RELAY03`, `VARS.VAR12`, `LIMITS.LIMIT01_02`, `BUTTONS_A.BUTTON_A01`). `native` = `{ segment, module, command, output }` — `onStateChange` sends `LCN.control(segment, module, command, output, val)`.
 - Updates for states that do not exist yet are created on the fly (`createStateOnTheFly()`). The generated ID **must** equal the requested one, otherwise `updateVariable` would recurse endlessly (#119).
 - `recalculateRelays()` creates/deletes the states that cannot be detected: output relays, display lines, regulator outputs/locks. It runs on start and (debounced 1 s) on every device object change — so changing the device `native` is how the device manager applies the module settings.

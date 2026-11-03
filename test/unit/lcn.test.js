@@ -28,6 +28,23 @@ function startPchk(options = {}) {
                 case '>M000007!R8-1------':
                     return ['-M000007!'];
             }
+            // module 20: firmware before 170206 with 3 variables, the answers contain no variable number
+            // module 21: the same, but it does not answer the serial number request
+            const old = line.match(/^>M000(020|021)\.(.+)$/);
+            if (old) {
+                const addr = `M000${old[1]}`;
+                const answers = {
+                    NMN1: [`=${addr}.N1Old`],
+                    SN: old[1] === '020' ? [`=${addr}.SN0C0A0F1A2B01FW0C0A0FHW004`] : [],
+                    MWV: [`%${addr}.01205`],
+                    MWTA: [`%${addr}.01180`],
+                    MWTB: [`%${addr}.01190`],
+                    MWSA: old[1] === '020' ? [`%${addr}.01210`] : [],
+                    MWSB: old[1] === '020' ? [`%${addr}.33978`] : [],
+                };
+                // MWT1-12 and MWS1-2 are unknown for old modules
+                return answers[old[2]] || [];
+            }
             // module 7 exists in the own segment (0) and in segment 5
             const m = line.match(/^>M(000|005)007\.(.+)$/);
             if (!m) {
@@ -148,6 +165,100 @@ describe('LCN library with simulated PCHK', function () {
         assert.strictEqual(found[7].states.filter(s => s.type === 'VAR').length, 12, 'all 12 variables are collected');
         assert.ok(found[7].states.every(state => state.segment === 5));
         assert.ok(sim.received.includes('>M005007.NMN1'));
+    });
+
+    it('should scan a module with firmware before 170206', async () => {
+        const found = await lcn.scanSegment(20, 20);
+        const module = found[20];
+        assert.strictEqual(module.fwSerial, 0x0c0a0f);
+        assert.strictEqual(module.typelessVars, true);
+        const vars = module.states.filter(s => s.type === 'VAR');
+        assert.deepStrictEqual(
+            vars.map(s => [s.input, s.status]),
+            [
+                [1, 1205],
+                [2, 18],
+                [3, 19],
+            ],
+        );
+        const regulators = module.states.filter(s => s.type === 'REGULATOR_OUT' || s.type === 'REGULATOR_LOCK_OUT');
+        assert.deepStrictEqual(
+            regulators.map(s => [s.type, s.input, s.status]),
+            [
+                ['REGULATOR_OUT', '1', 21],
+                ['REGULATOR_LOCK_OUT', '1', false],
+                ['REGULATOR_OUT', '2', 21],
+                ['REGULATOR_LOCK_OUT', '2', true],
+            ],
+        );
+        // the commands of the newer firmware are not sent
+        assert.ok(!sim.received.some(line => /^>M000020\.MWT\d/.test(line)));
+        assert.ok(sim.received.includes('>M000020.MWTA'));
+        assert.ok(!sim.received.some(line => /^>M000020\.MWS\d/.test(line)));
+    });
+
+    it('should try the commands of the old firmware, if the module answers neither SN nor MWT', async () => {
+        const found = await lcn.scanSegment(21, 21);
+        const module = found[21];
+        assert.strictEqual(module.fwSerial, undefined);
+        assert.strictEqual(module.typelessVars, true);
+        assert.deepStrictEqual(
+            module.states.filter(s => s.type === 'VAR').map(s => s.input),
+            [1, 2, 3],
+        );
+        assert.ok(sim.received.includes('>M000021.MWT12'));
+        assert.ok(sim.received.includes('>M000021.MWV'));
+    });
+
+    it('should read the variables one after another', async () => {
+        const updates = [];
+        const onUpdate = state => updates.push(state);
+        lcn.on('update', onUpdate);
+        const count = await lcn.readVariables(0, 7, [1, 5], false);
+        const countOld = await lcn.readVariables(0, 20, [1, 2, 3, 4], true);
+        lcn.off('update', onUpdate);
+
+        assert.strictEqual(count, 2);
+        assert.strictEqual(countOld, 3);
+        assert.deepStrictEqual(
+            updates.map(s => [s.module, s.type, s.input]),
+            [
+                [7, 'VAR', 1],
+                [7, 'VAR', 5],
+                [20, 'VAR', 1],
+                [20, 'VAR', 2],
+                [20, 'VAR', 3],
+            ],
+        );
+    });
+
+    it('should read the status of a module with firmware before 170206', async () => {
+        const updates = [];
+        const onUpdate = state => updates.push(state);
+        lcn.on('update', onUpdate);
+        await new Promise((resolve, reject) =>
+            lcn.scanModules(
+                [
+                    {
+                        segment: 0,
+                        module: 20,
+                        native: { segment: 0, module: 20, vars: 3, regulator: 2, typelessVars: true },
+                    },
+                ],
+                err => (err ? reject(new Error(err)) : resolve()),
+            ),
+        );
+        lcn.off('update', onUpdate);
+
+        assert.deepStrictEqual(
+            updates.filter(s => s.type === 'VAR').map(s => [s.input, s.status]),
+            [
+                [1, 1205],
+                [2, 18],
+                [3, 19],
+            ],
+        );
+        assert.strictEqual(updates.filter(s => s.type === 'REGULATOR_OUT').length, 2);
     });
 
     it('should control a relay', async () => {

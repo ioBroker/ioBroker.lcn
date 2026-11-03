@@ -42,6 +42,10 @@ To apply the valid convert functions to variables, the variables must have the v
 - **value.sun.azimuth** - sun azimuth
 - **value.sun.elevation** - sun elevation
 
+Modules with a firmware before 170206 have only 3 variables (TVar, R1Var, R2Var). They are created as `VARS.VAR01`-`VARS.VAR03`. Modules, that were scanned with an older version of the adapter, must be scanned again ("Scan again" in the device manager), so the adapter detects the firmware.
+
+The modules send the values of the variables not always by themselves. The option "Read variables every (min)" in the advanced settings reads the variables of all modules cyclically (`0` = off). The variables are read one after another, so with many modules one cycle can take some time.
+
 ## Display
 For every device you can activate if it has display or not (device manager: "Module settings").
 
@@ -58,6 +62,7 @@ For every device you can define how many output relays (0-8) must be created (de
 - Response timeout(ms) - timeout for control commands
 - Ping Interval(sec) - how often adapter sends ping requests 
 - Ping response timeout(ms) - timeout for ping requests
+- Read variables every (min) - read the variables of all modules cyclically. `0` = off (default)
 - IN/OUT Relays are the same - if the "out" and "in" relays are the same thing or if these relays are different ones. 
 ```
 // =====================  Same relays =============================
@@ -107,6 +112,9 @@ Every found module has the following actions:
 ## Changelog
 ### **WORK IN PROGRESS**
 - (bluefox) Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer
+- (bluefox) Fixed: variables of modules with a firmware before 170206 (only 3 variables) were not created. These modules must be scanned again (#22)
+- (bluefox) Added option to read the variables of all modules cyclically (#22)
+- (bluefox) Values without the number of the variable are ignored now. Before, the adapter logged an error for `MEASURES.MEASURE`
 
 ### 4.0.0-beta.1 (2026-11-03)
 - (bluefox) Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)

@@ -17,6 +17,7 @@ import type {
     LcnDeviceNative,
     LcnLogger,
     LcnState,
+    LcnStateNative,
     ReadTask,
     ScanProgress,
     ScanResultInfo,
@@ -199,6 +200,10 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
     private recalculateRelaysTimer: ioBroker.Timeout | undefined;
     private scanListener: ((progress: ScanProgress) => void) | null = null;
     private deviceManagement: LcnDeviceManagement | null = null;
+    /** Timer of the cyclic read of the variables */
+    private varPollTimer: ioBroker.Timeout | undefined;
+    /** The status read of all modules (readAll) is running */
+    private statusReadRunning = false;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -220,6 +225,10 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             if (this.recalculateRelaysTimer) {
                 this.clearTimeout(this.recalculateRelaysTimer);
                 this.recalculateRelaysTimer = undefined;
+            }
+            if (this.varPollTimer) {
+                this.clearTimeout(this.varPollTimer);
+                this.varPollTimer = undefined;
             }
             if (this.lcnConnected) {
                 void this.setState('info.connection', false, true);
@@ -295,6 +304,17 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                         this.getCachedObject(`${this.namespace}.${getAddress(segment, module)}`)
                             .catch(() => null)
                             .then(obj => this.lcnConnection.read(segment, module, obj?.native.leds ? 'AR' : op))
+                            .catch(e => this.log.warn(`Cannot read ${segment}:${module}: ${e}`));
+                    } else if (op === 'V') {
+                        // Modules with firmware before 170206 know only 3 variables and need other commands
+                        this.getCachedObject(`${this.namespace}.${getAddress(segment, module)}`)
+                            .catch(() => null)
+                            .then(obj => {
+                                if ((obj?.native as LcnDeviceNative | undefined)?.typelessVars) {
+                                    return this.lcnConnection.readVariables(segment, module, [1, 2, 3], true);
+                                }
+                                this.lcnConnection.read(segment, module, op);
+                            })
                             .catch(e => this.log.warn(`Cannot read ${segment}:${module}: ${e}`));
                     } else {
                         this.lcnConnection.read(segment, module, op);
@@ -943,6 +963,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                     module,
                     serial: device.serial,
                     fwVersion: device.fwVersion,
+                    fwSerial: device.fwSerial,
+                    typelessVars: device.typelessVars,
                     hwType: device.hwType,
                     manufacturer: device.manufacturer,
                     name: device.name,
@@ -964,6 +986,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                 module,
                 serial: device.serial,
                 fwVersion: device.fwVersion,
+                fwSerial: device.fwSerial,
+                typelessVars: device.typelessVars,
                 hwType: device.hwType,
                 manufacturer: device.manufacturer,
                 name: device.name,
@@ -1030,12 +1054,85 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             }
         }
         if (reads.length) {
+            this.statusReadRunning = true;
             this.setTimeout(() => {
                 this.log.info(`Status read of ${reads.length} started`);
-                this.lcn?.scanModules(reads, e => (e ? this.log.error(e) : this.log.info('Status read finished')));
+                if (!this.lcn) {
+                    this.statusReadRunning = false;
+                    return;
+                }
+                this.lcn.scanModules(reads, e => {
+                    this.statusReadRunning = false;
+                    if (e) {
+                        this.log.error(e);
+                    } else {
+                        this.log.info('Status read finished');
+                    }
+                });
             }, startDelay || 0);
         }
         return reads.length;
+    }
+
+    /**
+     * Collect the variables of all modules, that must be read cyclically
+     *
+     * @returns one entry per module with the numbers of its variables
+     */
+    private getVariableReads(): { segment: number; module: number; inputs: number[]; typeless: boolean }[] {
+        const reads: Record<string, { segment: number; module: number; inputs: number[]; typeless: boolean }> = {};
+        for (const id of Object.keys(this.objects)) {
+            const obj = this.objects[id];
+            if (obj.type !== 'state' || obj.native?.command !== COMMANDS.VAR.name) {
+                continue;
+            }
+            const native = obj.native as LcnStateNative;
+            const input = parseInt(String(native.output), 10);
+            if (!input) {
+                continue;
+            }
+            const deviceId = `${this.namespace}.${getAddress(native.segment, native.module)}`;
+            reads[deviceId] ||= {
+                segment: native.segment,
+                module: native.module,
+                inputs: [],
+                typeless: !!(this.objects[deviceId]?.native as LcnDeviceNative | undefined)?.typelessVars,
+            };
+            if (!reads[deviceId].inputs.includes(input)) {
+                reads[deviceId].inputs.push(input);
+            }
+        }
+        return Object.values(reads).map(read => ({ ...read, inputs: read.inputs.sort((a, b) => a - b) }));
+    }
+
+    /** Schedule the next cyclic read of the variables, if it is enabled */
+    private scheduleVariableRead(): void {
+        if (!this.config.varPollInterval || this.varPollTimer || !this.lcn) {
+            return;
+        }
+        this.varPollTimer = this.setTimeout(() => {
+            this.varPollTimer = undefined;
+            this.readVariablesCyclic()
+                .catch(e => this.log.warn(`Cannot read the variables: ${e}`))
+                .finally(() => this.scheduleVariableRead());
+        }, this.config.varPollInterval * 60_000);
+    }
+
+    /** Read the variables of all modules, one request after another */
+    private async readVariablesCyclic(): Promise<void> {
+        if (!this.lcn?.isConnected() || this.scan.step !== SCAN_STEP.INACTIVE || this.statusReadRunning) {
+            this.log.debug('Cyclic read of the variables skipped: not connected, scan or status read is running');
+            return;
+        }
+        const reads = this.getVariableReads();
+        let count = 0;
+        for (const read of reads) {
+            if (!this.lcn?.isConnected()) {
+                break;
+            }
+            count += await this.lcn.readVariables(read.segment, read.module, read.inputs, read.typeless);
+        }
+        this.log.debug(`Cyclic read of the variables: received ${count} values from ${reads.length} modules`);
     }
 
     private async updateVariable(id: string, type: string, value: ioBroker.StateValue | undefined): Promise<void> {
@@ -1248,8 +1345,12 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             const id = `${ns}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}${paddingZero(data.input)}`;
             void this.updateVariable(id, data.type, data.status);
         } else if (data.type === COMMANDS.MEASURE.name) {
-            const id = `${ns}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}`;
-            void this.updateVariable(id, data.type, data.status);
+            // A value without the number of the variable (module with firmware before 170206), that was not requested.
+            // It cannot be assigned to a state. Before 4.0.0 the adapter tried to write `MEASURES.MEASURE`
+            // with the value `undefined` and logged an error
+            this.log.debug(
+                `Ignored value ${data.value} of ${getAddress(data.segment, data.module)} without the number of the variable`,
+            );
         } else if (data.type === COMMANDS.LIMIT.name) {
             const id = `${ns}.${getAddress(data.segment, data.module)}.${data.type}S.${data.type}${paddingZero(data.input)}_${paddingZero(data.limit)}`;
             void this.updateVariable(id, data.type, data.status);
@@ -1308,6 +1409,7 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                     this.readAll(5000);
                 }
             }
+            this.scheduleVariableRead();
         });
 
         lcn.on('disconnected', () => {
@@ -1346,6 +1448,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         this.config.analogMode = parseInt(config.analogMode as string, 10) || 1;
         this.config.connectTimeout = parseInt(config.connectTimeout as string, 10) || 6000;
         this.config.scanResponseTimeout = parseInt(config.scanResponseTimeout as string, 10) || 1000;
+        // in minutes, 0 = off
+        this.config.varPollInterval = Math.max(0, parseInt(config.varPollInterval as string, 10) || 0);
         this.config.combinedRelays =
             config.combinedRelays === undefined
                 ? true

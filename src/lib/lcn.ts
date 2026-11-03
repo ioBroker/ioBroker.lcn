@@ -4,7 +4,14 @@
  */
 import { EventEmitter } from 'node:events';
 import { Connection } from './connection';
-import { COMMANDS, CMDS, getCommand, type CommandArgument, type CommandDefinition } from './cmds';
+import {
+    COMMANDS,
+    CMDS,
+    FIRMWARE_TYPED_VARIABLES,
+    getCommand,
+    type CommandArgument,
+    type CommandDefinition,
+} from './cmds';
 import type { FoundModule, FoundModules, LcnLogger, LcnOptions, LcnState, ReadTask } from './types';
 
 // The library uses its own timers, so it can be used without the adapter.
@@ -275,6 +282,107 @@ export class LCN extends EventEmitter {
         return this.connection.commandPromise(cmd, command.detect, this.scanResponseTimeout, true);
     }
 
+    /**
+     * Send a request and wait for the answer. A timeout, an error answer or a closed connection deliver undefined
+     *
+     * @param cmd the command
+     * @param regAnswer expected answer
+     */
+    private async requestOptional(cmd: string, regAnswer: RegExp): Promise<string | undefined> {
+        try {
+            return await this.connection.commandPromise(cmd, regAnswer, this.scanResponseTimeout, true);
+        } catch (e) {
+            this.logger.debug(`[LCN] No answer to ${cmd}: ${e}`);
+            return undefined;
+        }
+    }
+
+    /**
+     * Request one variable or regulator set value of a module with firmware before 170206.
+     * The answer contains no number, so the requests must be sent one after another.
+     *
+     * @param segment segment address
+     * @param module module address
+     * @param type VAR (1-3) or REGULATOR (1-2)
+     * @param input number of the variable or regulator
+     */
+    private async requestTypeless(
+        segment: number,
+        module: number,
+        type: 'VAR' | 'REGULATOR',
+        input: number,
+    ): Promise<LcnState[]> {
+        const address = { segment, module };
+        const cmd =
+            type === 'VAR'
+                ? CMDS.buildGetVariableTypeless(address, input)
+                : CMDS.buildGetSetValueTypeless(address, input);
+        const data = await this.requestOptional(cmd, CMDS.detectTypeless(segment, module));
+        if (!data) {
+            return [];
+        }
+        return (
+            (type === 'VAR' ? CMDS.parseTypelessVariable(data, input) : CMDS.parseTypelessSetValue(data, input)) || []
+        );
+    }
+
+    /**
+     * Read the variables of one module one after another and emit them as `update`.
+     * Used by the status read of modules with firmware before 170206 and by the cyclic read of the variables.
+     *
+     * @param segment segment address
+     * @param module module address
+     * @param inputs numbers of the variables: 1-12, firmware before 170206: 1-3
+     * @param typeless the module has a firmware before 170206
+     * @returns number of received values
+     */
+    async readVariables(segment: number, module: number, inputs: number[], typeless?: boolean): Promise<number> {
+        let count = 0;
+        for (const input of inputs) {
+            if (this.scan || !this.connected) {
+                // A running scan reads the variables itself
+                break;
+            }
+            let states: LcnState[] | undefined;
+            if (typeless) {
+                if (input > 3) {
+                    continue;
+                }
+                states = await this.requestTypeless(segment, module, 'VAR', input);
+            } else {
+                const data = await this.requestOptional(
+                    COMMANDS.VAR.generate({ segment, module, input }),
+                    CMDS.detectVariable(segment, module, input),
+                );
+                states = data ? COMMANDS.VAR.parse(data) : undefined;
+            }
+            states?.forEach(state => {
+                count++;
+                this.logger.debug(
+                    `[LCN][RECEIVED] ${this.resolveName(state.segment, state.module)} - ${JSON.stringify(state)}`,
+                );
+                this.emit('update', state);
+            });
+        }
+        return count;
+    }
+
+    /**
+     * Read the regulator set values of a module with firmware before 170206 and emit them as `update`
+     *
+     * @param segment segment address
+     * @param module module address
+     */
+    private async readSetValuesTypeless(segment: number, module: number): Promise<void> {
+        for (let r = 1; r <= 2; r++) {
+            if (this.scan || !this.connected) {
+                break;
+            }
+            const states = await this.requestTypeless(segment, module, 'REGULATOR', r);
+            states.forEach(state => this.emit('update', state));
+        }
+    }
+
     private async _processScanRead(): Promise<void> {
         const scan = this.scan;
         if (!scan) {
@@ -362,40 +470,74 @@ export class LCN extends EventEmitter {
                 module.manufacturer = parsed.manufacturer;
                 module.hwType = parsed.hwType;
                 module.fwVersion = parsed.fwVersion;
+                module.fwSerial = parsed.fwSerial;
                 this.logger.debug(`[LCN][SCAN1] Serial ${scan.segment}:${scan.module}: ${JSON.stringify(parsed)}`);
             } else {
                 this.logger.debug(`[LCN][SCAN1] Serial timeout`);
             }
 
-            for (let i = 1; i < 12; i++) {
-                // answers will be processed in on('data', () =>)
-                this.connection.command(
-                    COMMANDS.VAR.generate({ ...address, input: i }),
-                    COMMANDS.VAR.detect,
-                    this.scanResponseTimeout,
-                    true,
-                );
-            }
-            data = await this.request(COMMANDS.VAR, COMMANDS.VAR.generate({ ...address, input: 12 }));
-            if (data) {
-                const parsed = COMMANDS.VAR.parse(data);
-                if (!parsed) {
-                    throw new Error(`Cannot parse ${data}`);
+            module.states ||= [];
+            // Modules with firmware before 170206 know only 3 variables and answer without their number
+            const oldFirmware = module.fwSerial !== undefined && module.fwSerial < FIRMWARE_TYPED_VARIABLES;
+            if (!oldFirmware) {
+                for (let i = 1; i < 12; i++) {
+                    // answers will be processed in on('data', () =>)
+                    this.connection.command(
+                        COMMANDS.VAR.generate({ ...address, input: i }),
+                        COMMANDS.VAR.detect,
+                        this.scanResponseTimeout,
+                        true,
+                    );
                 }
-                this.checkModule(scan, parsed[0], 'VAR');
-                module.states ||= [];
-                parsed.forEach(item => module.states!.push(item));
-                this.logger.debug(`[LCN][SCAN1] VAR state ${scan.segment}:${scan.module}: ${module.states.length}`);
-            } else {
-                this.logger.debug(`[LCN][SCAN1] VAR timeout`);
+                data = await this.requestOptional(
+                    COMMANDS.VAR.generate({ ...address, input: 12 }),
+                    COMMANDS.VAR.detect,
+                );
+                if (data) {
+                    const parsed = COMMANDS.VAR.parse(data);
+                    if (!parsed) {
+                        throw new Error(`Cannot parse ${data}`);
+                    }
+                    this.checkModule(scan, parsed[0], 'VAR');
+                    parsed.forEach(item => module.states!.push(item));
+                    this.logger.debug(`[LCN][SCAN1] VAR state ${scan.segment}:${scan.module}: ${module.states.length}`);
+                } else {
+                    this.logger.debug(`[LCN][SCAN1] VAR timeout`);
+                }
+            }
+            if (
+                oldFirmware ||
+                // The firmware is unknown (no answer to SN) and the module did not answer to MWT: try the old commands
+                (module.fwSerial === undefined && !data && !module.states.some(s => s.type === COMMANDS.VAR.name))
+            ) {
+                for (let i = 1; i <= 3; i++) {
+                    const states = await this.requestTypeless(scan.segment, scan.module, 'VAR', i);
+                    if (states.length) {
+                        module.typelessVars = true;
+                        states.forEach(item => module.states!.push(item));
+                    }
+                }
+                this.logger.debug(
+                    `[LCN][SCAN1] VAR (firmware before 170206) ${scan.segment}:${scan.module}: ${module.typelessVars ? 'found' : 'timeout'}`,
+                );
             }
 
             for (let r = 1; r <= 2; r++) {
-                data = await this.request(COMMANDS.REGULATOR, COMMANDS.REGULATOR.generate({ ...address, input: r }));
+                if (module.typelessVars) {
+                    const states = await this.requestTypeless(scan.segment, scan.module, 'REGULATOR', r);
+                    states.forEach(item => module.states!.push(item));
+                    this.logger.debug(
+                        `[LCN][SCAN1] REGULATOR${r} (firmware before 170206) ${scan.segment}:${scan.module}: ${states.length ? 'found' : 'timeout'}`,
+                    );
+                    continue;
+                }
+                data = await this.requestOptional(
+                    COMMANDS.REGULATOR.generate({ ...address, input: r }),
+                    COMMANDS.REGULATOR.detect,
+                );
                 if (data) {
                     const parsed = COMMANDS.REGULATOR.parse(data);
                     this.checkModule(scan, parsed[0], `REGULATOR${r}`);
-                    module.states ||= [];
                     parsed.forEach(item => module.states!.push(item));
                     this.logger.debug(
                         `[LCN][SCAN1] REGULATOR${r} state ${scan.segment}:${scan.module}: ${module.states.length}`,
@@ -589,17 +731,29 @@ export class LCN extends EventEmitter {
             if (native.sensors) {
                 conn.command(COMMANDS.STATUS_S.generate(task));
             }
+
+            // Modules with firmware before 170206 answer without the number of the variable,
+            // so these values are requested strictly one after another
+            let typeless: Promise<unknown> = Promise.resolve();
             if (native.regulator) {
-                for (let i = 1; i <= 2; i++) {
-                    task.input = i;
-                    conn.command(COMMANDS.REGULATOR.generate(task));
+                if (native.typelessVars) {
+                    typeless = typeless.then(() => this.readSetValuesTypeless(task.segment, task.module));
+                } else {
+                    for (let i = 1; i <= 2; i++) {
+                        task.input = i;
+                        conn.command(COMMANDS.REGULATOR.generate(task));
+                    }
                 }
             }
 
             if (native.vars) {
-                for (let i = 1; i <= 12; i++) {
-                    task.input = i;
-                    conn.command(COMMANDS.VAR.generate(task));
+                if (native.typelessVars) {
+                    typeless = typeless.then(() => this.readVariables(task.segment, task.module, [1, 2, 3], true));
+                } else {
+                    for (let i = 1; i <= 12; i++) {
+                        task.input = i;
+                        conn.command(COMMANDS.VAR.generate(task));
+                    }
                 }
             }
             if (native.counters) {
@@ -609,11 +763,13 @@ export class LCN extends EventEmitter {
                 }
             }
 
-            if (tasks.length) {
-                this._later(() => this.scanModules(tasks, cb), 1200);
-            } else {
-                cb?.();
-            }
+            void typeless.then(() => {
+                if (tasks.length) {
+                    this._later(() => this.scanModules(tasks, cb), 1200);
+                } else {
+                    cb?.();
+                }
+            });
         }
     }
 

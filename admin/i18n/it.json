@@ -57,5 +57,7 @@
     "Max module for scan": "Indirizzo modulo più alto da scansionare",
     "E.g. \"250\" or \"5-30\"": "Es. \"250\" (moduli 3-250) o un intervallo come \"5-30\"",
     "Found %s devices, new of them %s devices.": "Trovati %s moduli, di cui nuovi: %s.",
-    "Module %s did not answer": "Il modulo %s non ha risposto"
+    "Module %s did not answer": "Il modulo %s non ha risposto",
+    "Read variables every (min)": "Leggi le variabili ogni (min)",
+    "0 = off. The variables of all modules are read one after another": "0 = disattivato. Le variabili di tutti i moduli vengono lette una dopo l'altra"
 }

@@ -29,6 +29,8 @@ declare global {
             readAtStart: boolean;
             /** Input and output relays are the same states */
             combinedRelays: boolean;
+            /** Read the variables of all modules every X minutes, 0 = off */
+            varPollInterval: number;
         }
     }
 }
