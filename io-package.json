@@ -27,8 +27,21 @@
       "uk": "LCN - Local Control Network",
       "zh-cn": "LCN - Local Control Network"
     },
-    "version": "4.0.0-beta.0",
+    "version": "4.0.0-beta.1",
     "news": {
+      "4.0.0-beta.1": {
+        "en": "Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)",
+        "de": "Module in anderen Segmenten können gescannt werden. (#53)",
+        "ru": "Модули в других сегментах можно сканировать: диалоговое окно сканирования принимает список сегментов (#53)",
+        "pt": "Módulos em outros segmentos: o diálogo aceita uma lista de segmentos (#53)",
+        "nl": "Modules in andere segmenten kunnen worden gescand: in de scandialoog wordt een lijst met segmenten geaccepteerd (#53)",
+        "fr": "Les modules d'autres segments peuvent être scannés : la boîte de dialogue accepte une liste de segments (#53)",
+        "it": "È possibile scansionare moduli in altri segmenti: ne accetta un elenco (#53)",
+        "es": "Se pueden escanear módulos de otros segmentos: el cuadro de escaneo acepta una lista de segmentos (#53)",
+        "pl": "Moduły w innych segmentach mogą być skanowane: okno dialogowe skanowania akceptuje listę segmentów (#53)",
+        "uk": "Модулі в інших сегментах можна сканувати: діалогове вікно сканування приймає список сегментів (#53)",
+        "zh-cn": "可以扫描其他分段中的模块：扫描对话框接受分段列表 (#53)"
+      },
       "4.0.0-beta.0": {
         "en": "Breaking change: Adapter requires admin >= 7.8.23 now\nThe adapter was refactored to TypeScript\nThe configuration dialog was migrated to JsonConfig. The modules are scanned and configured in the device manager\nFixed: the adapter reconnected to LCN after it was stopped and did not finish the stop correctly\nFixed: `ir.lowbat` was never set\nFixed: finger sensor codes were written into `ir.serial` instead of `finger.code`\nFixed: a failed authentication on LCN-PCHK was not recognized\nFixed: regulator states of scanned modules were recreated on every change of the device object\nFixed: writing a state, whose object cannot be read, could crash the adapter",
         "de": "Aktuelle Änderung: Adapter benötigt Admin >= 7.8.23\nDer Adapter wurde auf TypeScript umgestellt\nDer Konfigurationsdialog wurde zu JSONConfig migriert. Die Module werden im Gerätemanager gescannt und konfiguriert\nBehoben: Der Adapter ging nach dem Stopp wieder an LCN an und beendete ihn nicht richtig\nFix: `ir.lowbat` war nie gesetzt\nBehoben: Fingersensorcodes wurden in `ir.serial` statt in `finger.code` geschrieben\nBehoben: Fehler bei LCN-PCHK wurden nicht erkannt\nBehoben: Reglerstatus gescannter Module wurde bei jedem Gerätewechsel neu erzeugt\nBehoben: Das Schreiben eines unlesbaren Zustands führte zum Adapterabsturz",
@@ -106,19 +119,6 @@
         "pl": "Wyłącz możliwość instalacji przez git",
         "uk": "Вимкнути можливість установки через git",
         "zh-cn": "禁用通过 git 安装的可能性"
-      },
-      "2.0.0": {
-        "en": "Made adapter compatible with js-controller 6\nA minimum supported node.js version is 18",
-        "de": "Hergestellter Adapter kompatibel mit js-controller 6\nEine minimal unterstützte node.js-Version ist 18",
-        "ru": "Сделанный адаптер совместимый с js-контроллером 6\nМинимальная поддерживаемая версия node.js - 18",
-        "pt": "Adaptador feito compatível com js-controller 6\nUma versão mínima suportada node.js é 18",
-        "nl": "Maatadapter compatibel met js-controller 6\nEen minimaal ondersteunde node.js versie is 18",
-        "fr": "Adaptateur compatible avec js-controller 6\nUne version minimum prise en charge node.js est 18",
-        "it": "Adattatore realizzato compatibile con js-controller 6\nUna versione minima node.js supportata è 18",
-        "es": "Adaptador hecho compatible con js-controller 6\nUna versión mínima de node.js es 18",
-        "pl": "Wykonany adapter kompatybilny ze sterownikiem js- 6\nMinimalna obsługiwana wersja node.js to 18",
-        "uk": "Виготовлений адаптер сумісний з js-controller 6\nМінімальна підтримана вершина.js версія 18",
-        "zh-cn": "使适配器与 js 控制器 6 兼容\n最小支持的节点.js版本为 18"
       }
     },
     "platform": "Javascript/Node.js",

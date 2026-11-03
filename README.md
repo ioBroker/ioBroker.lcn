@@ -105,7 +105,7 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0-beta.1 (2026-11-03)
 - (bluefox) Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)
 
 ### 4.0.0-beta.0 (2026-11-03)
@@ -131,9 +131,6 @@ Every found module has the following actions:
 
 ### 2.0.3 (2024-09-04)
 * (bluefox) Added translations
-
-### 2.0.2 (2024-09-03)
-* (bluefox) Corrected checking of licenses with license manager
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
