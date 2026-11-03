@@ -32,3 +32,18 @@ describe('CMDS.parseStatus', () => {
         assert.strictEqual(result[7].type, COMMANDS.RELAY_IN.name);
     });
 });
+
+describe('CMDS IR and finger sensor', () => {
+    it('should deliver the low battery flag of IR remote controls', () => {
+        const [ir] = CMDS.parseIR('=M000005.ZI0170340510130021');
+        assert.strictEqual(ir.type, COMMANDS.IR.name);
+        assert.strictEqual(typeof ir.lowBat, 'boolean');
+    });
+
+    it('should deliver the type FINGER for finger sensors', () => {
+        assert.match('=M000005.ZT017034051', COMMANDS.FINGER_SCAN.detect);
+        const [finger] = CMDS.parseFingerSensor('=M000005.ZT017034051');
+        assert.strictEqual(finger.type, COMMANDS.FINGER_SCAN.name);
+        assert.strictEqual(finger.module, 5);
+    });
+});

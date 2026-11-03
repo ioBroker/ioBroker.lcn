@@ -132,8 +132,8 @@ export class Connection extends EventEmitter {
     private pingIndex = 0;
     private requests: CommandTask[] = [];
     private processingCommand: CommandTask | null = null;
-    /** null after the socket was closed (see the handlers in connect()) */
-    private buffer: string | null = '';
+    /** Received data of an incomplete line */
+    private buffer = '';
     private shutdown = false;
     private state: ConnectionState = STATES.CONNECTING;
     private socket: Socket | null = null;
@@ -190,7 +190,7 @@ export class Connection extends EventEmitter {
         this.socket = socket;
 
         socket.on('error', (error: Error): void => {
-            this.buffer = null;
+            this.buffer = '';
             if (this.socket) {
                 this.emit('error', error);
                 this.socket.destroy();
@@ -199,7 +199,7 @@ export class Connection extends EventEmitter {
         });
 
         socket.on('end', (): void => {
-            this.buffer = null;
+            this.buffer = '';
             if (this.socket) {
                 this.socket.destroy();
                 this.socket = null;
@@ -211,7 +211,7 @@ export class Connection extends EventEmitter {
         });
 
         socket.on('close', (): void => {
-            this.buffer = null;
+            this.buffer = '';
             if (this.socket) {
                 this.socket.destroy();
                 this.socket = null;
@@ -231,7 +231,6 @@ export class Connection extends EventEmitter {
                 return;
             }
 
-            // Note: after an error the buffer is null and "null" is prepended to the first line (sic)
             this.buffer = `${this.buffer}${data.toString()}`;
             const lines = this.buffer.split(/\r\n|\n\r|\n|\r/); // any combinations of
             this.buffer = lines[lines.length - 1] || ''; // save the last not full command
@@ -353,8 +352,7 @@ export class Connection extends EventEmitter {
             case STATES.WAIT_AUTH_OK:
                 if (PROMPT_AUTH_OK.test(data)) {
                     this._changeState(STATES.WAIT_CONNECTED, this.params.connectTimeout);
-                } else if ((data as unknown) === PROMPT_AUTH_FAILED) {
-                    // Note: a string is compared with a RegExp here, so this branch is never taken (sic)
+                } else if (PROMPT_AUTH_FAILED.test(data)) {
                     this._onError(`Authentication failure`);
                 } else {
                     this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME.toString()}`, true);

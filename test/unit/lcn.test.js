@@ -1,6 +1,7 @@
 const assert = require('node:assert');
 const net = require('node:net');
 const { LCN, SCAN_STEP } = require('../../build/lib/lcn');
+const { Connection } = require('../../build/lib/connection');
 
 const silentLogger = { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} };
 
@@ -9,7 +10,7 @@ const silentLogger = { debug: () => {}, info: () => {}, warn: () => {}, error: (
  *
  * @returns {Promise<{server: net.Server, port: number, received: string[], connections: number, push: (line: string) => void}>}
  */
-function startPchk() {
+function startPchk(options = {}) {
     return new Promise(resolve => {
         const sim = { received: [], connections: 0, sockets: [] };
         sim.push = line => sim.sockets.forEach(s => s.write(`${line}\n`));
@@ -19,7 +20,7 @@ function startPchk() {
                 case 'u':
                     return ['Password:'];
                 case 'p':
-                    return ['OK', '$io:#LCN:connected'];
+                    return options.authFailed ? ['Authentification failed.'] : ['OK', '$io:#LCN:connected'];
                 case '!OM0P':
                     return ['(0..50-mode percent)'];
                 case '!CHD':
@@ -144,5 +145,46 @@ describe('LCN library with simulated PCHK', function () {
         await new Promise(resolve => lcn.destroy(resolve));
         await new Promise(resolve => setTimeout(resolve, 500));
         assert.strictEqual(sim.connections, connections);
+    });
+});
+
+describe('Connection with simulated PCHK', function () {
+    this.timeout(10000);
+
+    const params = port => ({
+        host: '127.0.0.1',
+        port,
+        user: 'u',
+        password: 'p',
+        reconnectTimeout: 100,
+        connectTimeout: 2000,
+        pingInterval: 600000,
+        pingTimeout: 500,
+        logger: silentLogger,
+    });
+
+    it('should detect a failed authentication', async () => {
+        const sim = await startPchk({ authFailed: true });
+        const conn = new Connection(params(sim.port));
+        const error = await new Promise(resolve => conn.on('error', resolve));
+        await new Promise(resolve => conn.destroy(false, resolve));
+        sim.sockets.forEach(s => s.destroy());
+        sim.server.close();
+        assert.strictEqual(error, 'Authentication failure');
+    });
+
+    it('should log in again after the connection was closed', async () => {
+        const sim = await startPchk();
+        const conn = new Connection(params(sim.port));
+        await new Promise(resolve => conn.once('connected', resolve));
+        // the gateway drops the connection
+        sim.sockets.forEach(s => s.destroy());
+        await new Promise(resolve => conn.once('connected', resolve));
+        await new Promise(resolve => conn.destroy(false, resolve));
+        sim.sockets.forEach(s => s.destroy());
+        sim.server.close();
+        assert.strictEqual(sim.connections, 2);
+        // logged in twice
+        assert.deepStrictEqual(sim.received.filter(line => line === 'u').length, 2);
     });
 });

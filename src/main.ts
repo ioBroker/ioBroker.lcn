@@ -221,7 +221,6 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                 this.clearTimeout(this.recalculateRelaysTimer);
                 this.recalculateRelaysTimer = undefined;
             }
-            // Note: `connected` is never set to true (sic)
             if (this.lcnConnected) {
                 void this.setState('info.connection', false, true);
                 this.lcnConnected = false;
@@ -251,17 +250,24 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             return;
         }
         if (id.startsWith(`${this.namespace}.S`)) {
-            // Note: an unknown object is not caught (sic)
-            void this.getCachedObject(id).then(obj =>
-                this.lcnConnection
-                    .control(obj.native.segment, obj.native.module, obj.native.command, obj.native.output, state.val)
-                    .then(() => this.log.debug('Command sent'))
-                    .catch(e =>
-                        this.log.error(
-                            `Cannot send ${obj.native.segment}:${obj.native.module}(${obj.native.command}, out=${obj.native.output}, val="${state.val}"): ${e}`,
+            this.getCachedObject(id)
+                .then(obj =>
+                    this.lcnConnection
+                        .control(
+                            obj.native.segment,
+                            obj.native.module,
+                            obj.native.command,
+                            obj.native.output,
+                            state.val,
+                        )
+                        .then(() => this.log.debug('Command sent'))
+                        .catch(e =>
+                            this.log.error(
+                                `Cannot send ${obj.native.segment}:${obj.native.module}(${obj.native.command}, out=${obj.native.output}, val="${state.val}"): ${e}`,
+                            ),
                         ),
-                    ),
-            );
+                )
+                .catch(e => this.log.warn(`Cannot control ${id}: ${e}`));
         } else if (id.match(/scan\.manual$/)) {
             if (!state.val) {
                 this.log.debug('Received empty scan command. Ignored.');
@@ -285,14 +291,11 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
                             op !== 'C' &&
                             op !== 'SE')
                     ) {
-                        // Note: `id` is the ID of scan.manual and not of the device (sic)
-                        void this.getCachedObject(id).then(obj => {
-                            if (obj.native.leds) {
-                                this.lcnConnection.read(segment, module, 'AR');
-                            } else {
-                                this.lcnConnection.read(segment, module, op);
-                            }
-                        });
+                        // Modules with LEDs are read without sensors
+                        this.getCachedObject(`${this.namespace}.${getAddress(segment, module)}`)
+                            .catch(() => null)
+                            .then(obj => this.lcnConnection.read(segment, module, obj?.native.leds ? 'AR' : op))
+                            .catch(e => this.log.warn(`Cannot read ${segment}:${module}: ${e}`));
                     } else {
                         this.lcnConnection.read(segment, module, op);
                     }
@@ -548,8 +551,8 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             }
 
             // regulators
-            // Note: the scan stores the number of regulators, so a number is compared with a boolean (sic)
-            const regulatorOut = device.regulator || false;
+            // The scan stores the number of regulators, the settings a boolean
+            const regulatorOut = !!device.regulator;
             channelId = `${id}.${COMMANDS.REGULATOR_OUT.name}S`; // lcn.0.S000.M010.REGULATOR_OUT
             name = `${channelId}.${COMMANDS.REGULATOR_OUT.name}0`; // lcn.0.S000.M010.REGULATOR_OUT.REGULATOR0
             const regulator = !!ids.find(_id => _id.startsWith(name));
@@ -1220,16 +1223,13 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             if (data.key !== undefined) {
                 void this.setState('ir.key', data.key, true);
             }
-            // Note: parseIR delivers `lowBat` (sic)
-            const lowbat = (data as LcnState & { lowbat?: boolean }).lowbat;
-            if (lowbat !== undefined) {
-                void this.setState('ir.lowbat', lowbat, true);
+            if (data.lowBat !== undefined) {
+                void this.setState('ir.lowbat', data.lowBat, true);
             }
             if (data.action !== undefined) {
                 void this.setState('ir.action', data.action, true);
             }
         } else if (data.type === COMMANDS.FINGER_SCAN.name) {
-            // Note: parseFingerSensor delivers the type IR, so this is never reached (sic)
             if (data.serial !== undefined) {
                 void this.setState('finger.code', data.serial, true);
             }
@@ -1299,6 +1299,7 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         this.lcn = lcn;
 
         lcn.on('connected', () => {
+            this.lcnConnected = true;
             void this.setState('info.connection', true, true);
             if (!this.statusReadDone) {
                 this.statusReadDone = true;
@@ -1308,7 +1309,10 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
             }
         });
 
-        lcn.on('disconnected', () => void this.setState('info.connection', false, true));
+        lcn.on('disconnected', () => {
+            this.lcnConnected = false;
+            void this.setState('info.connection', false, true);
+        });
 
         lcn.on('update', (data: LcnState) => this.onUpdate(data));
 
