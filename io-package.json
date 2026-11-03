@@ -27,8 +27,21 @@
       "uk": "LCN - Local Control Network",
       "zh-cn": "LCN - Local Control Network"
     },
-    "version": "4.0.0-beta.1",
+    "version": "4.0.0-beta.2",
     "news": {
+      "4.0.0-beta.2": {
+        "en": "Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer\nFixed: variables of modules with a firmware before 170206 (only 3 variables) were not created. These modules must be scanned again (#22)\nAdded option to read the variables of all modules cyclically (#22)\nValues without the number of the variable are ignored now. Before, the adapter logged an error for `MEASURES.MEASURE`",
+        "de": "Behoben: Befehle konnten in der Warteschlange hängen, wenn mehrere Befehle auf Antwort warten\nBehoben: Modulvariablen mit Firmware vor 170206 (nur 3 Variablen) wurden nicht erstellt. Die Module müssen erneut gescannt werden (#22)\nOption zum zyklischen Lesen aller Modulvariablen hinzugefügt (#22)\nWerte ohne Variablennummer werden jetzt ignoriert. Vorher meldete der Adapter einen Fehler für `MEASURES.MEASURE`",
+        "ru": "Исправлено: команды могли застревать в очереди, если несколько команд ожидали ответа\nИсправлено: переменные модулей с прошивкой до 170206 (только 3 переменные) не создавались. Эти модули необходимо снова отсканировать (#22)\nДобавлена возможность циклического чтения переменных всех модулей (#22)\nЗначения без номера переменной теперь игнорируются. Раньше адаптер регистрировал ошибку для `MEASURES.MEASURE`",
+        "pt": "Corrigido: comandos poderiam ficar presos na fila se vários esperassem por uma resposta\nCorrigido: variáveis de módulos com firmware anterior a 170206 (só 3) não foram criadas. Esses módulos devem ser lidos (#22)\nAdição da leitura cíclica das variáveis de todos os módulos (#22)\nValores sem o número da variável agora são ignorados. Antes, o adaptador registrou um erro em `MEASURES.MEASURE`",
+        "nl": "Opgelost: opdrachten kunnen vast komen te zitten in de wachtrij, als er meerdere opdrachten achter een commando wachtten, dat wacht op een antwoord\nOpgelost: variabelen van modules met een firmware vóór 170206 (slechts 3 variabelen) zijn niet aangemaakt. Deze modules moeten opnieuw worden gescand (#22)\nOptie toegevoegd om de variabelen van alle modules cyclisch te lezen (#22)\nWaarden zonder het nummer van de variabele worden nu genegeerd. Vroeger registreerde de adapter een fout voor `MEASURES.MEASURE`",
+        "fr": "Corrigé : les commandes pouvaient rester bloquées dans la file d'attente si plusieurs commandes attendaient une réponse\nCorrigé : les variables des modules dont le firmware était antérieur à 170206 (3 seules) n'étaient pas créées. Ces modules doivent être scannés à nouveau (#22)\nAjout d'une option de lecture cyclique des variables des modules (#22)\nLes valeurs sans numéro de variable sont désormais ignorées. Avant, l'adaptateur enregistrait une erreur pour `MEASURES.MEASURE`",
+        "it": "Risolto: i comandi potevano rimanere bloccati in coda, se più comandi attendevano una risposta\nRisolto: i moduli con firmware precedente al 170206 (solo 3 variabili) non erano creati. Questi moduli vanno risanalizzati (#22)\nAggiunta la lettura ciclica delle variabili di tutti i moduli (#22)\nI valori senza il numero della variabile ora sono ignorati. Prima, l'adattatore registrava un errore «MEASURES.MEASURE`",
+        "es": "Corregido: los comandos podían quedarse en la cola, si varios comandos esperaban detrás de un comando, espera una respuesta\nCorregido: no se crearon variables de módulos con firmware anterior a 170206 (solo 3 variables). Hay que volver a escanear estos módulos (#22)\nSe ha añadido la opción de leer cíclicamente las variables (#22)\nLos valores sin el número de la variable se ignoran ahora. Antes, el adaptador registraba un error en «MEASURES.MEASURE`",
+        "pl": "Naprawiono: polecenia mogły utknąć w kolejce, jeśli kilka poleceń czekało za poleceniem, które czeka na odpowiedź\nNaprawiono: zmienne modułów z oprogramowaniem sprzętowym przed 170206 (tylko 3 zmienne) nie zostały utworzone. Te moduły muszą zostać ponownie zeskanowane (#22)\nDodano opcję cyklicznego odczytu zmiennych wszystkich modułów (#22)\nWartości bez numeru zmiennej są teraz ignorowane. Wcześniej adapter zarejestrował błąd „MEASURES.MEASURES.MEASURE”",
+        "uk": "Виправлено: команди можуть застрягти в черзі, якщо кілька команд чекали за командою, яка чекає відповіді\nВиправлено: змінні модулів з прошивкою до 170206 (тільки 3 змінні) не були створені. Ці модулі повинні бути відскановані ще раз (#22)\nДодана можливість читати змінні всіх модулів циклічно (#22)\nЗначення без номера змінної тепер ігноруються. Раніше адаптер реєстрував помилку для `MEASURES.MEASURE`",
+        "zh-cn": "修复：命令可能会卡在队列中，如果有几个命令在命令后面等待，则等待答案\n修复：固件在 170206 之前的模块的变量（只有 3 个变量）未创建。必须再次扫描这些模块 (#22)\n添加了循环读取所有模块变量的选项 (#22)\n现在，没有变量编号的值将被忽略。以前，适配器记录了 “MEASURES.MEASURE” 的错误"
+      },
       "4.0.0-beta.1": {
         "en": "Modules in other segments can be scanned: the scan dialog accepts a list of segments (#53)",
         "de": "Module in anderen Segmenten können gescannt werden. (#53)",
@@ -106,19 +119,6 @@
         "pl": "Poprawione sprawdzanie licencji z menedżerem licencji",
         "uk": "Виправлена перевірка ліцензійного менеджера",
         "zh-cn": "与许可证管理者核对许可证"
-      },
-      "2.0.1": {
-        "en": "Disable possibility to install via git",
-        "de": "Deaktivieren Sie die Möglichkeit über git zu installieren",
-        "ru": "Отключить возможность установки через git",
-        "pt": "Desativar a possibilidade de instalar via git",
-        "nl": "De mogelijkheid uitschakelen om via git te installeren",
-        "fr": "Désactiver la possibilité d'installer via git",
-        "it": "Disattiva la possibilità di installare tramite git",
-        "es": "Posibilidad de instalar mediante git",
-        "pl": "Wyłącz możliwość instalacji przez git",
-        "uk": "Вимкнути можливість установки через git",
-        "zh-cn": "禁用通过 git 安装的可能性"
       }
     },
     "platform": "Javascript/Node.js",

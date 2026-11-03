@@ -1,4 +1,7 @@
 # Older changes
+## 2.0.3 (2024-09-04)
+* (bluefox) Added translations
+
 ## 2.0.2 (2024-09-03)
 * (bluefox) Corrected checking of licenses with license manager
 

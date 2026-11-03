@@ -110,7 +110,7 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0-beta.2 (2026-11-03)
 - (bluefox) Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer
 - (bluefox) Fixed: variables of modules with a firmware before 170206 (only 3 variables) were not created. These modules must be scanned again (#22)
 - (bluefox) Added option to read the variables of all modules cyclically (#22)
@@ -139,9 +139,6 @@ Every found module has the following actions:
 
 ### 3.0.1 (2025-03-24)
 * (bluefox) License was changed to MIT. The adapter is now free of charge.
-
-### 2.0.3 (2024-09-04)
-* (bluefox) Added translations
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
