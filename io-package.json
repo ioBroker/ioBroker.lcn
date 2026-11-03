@@ -27,8 +27,21 @@
       "uk": "LCN - Local Control Network",
       "zh-cn": "LCN - Local Control Network"
     },
-    "version": "4.0.0-beta.2",
+    "version": "4.0.0-beta.3",
     "news": {
+      "4.0.0-beta.3": {
+        "en": "Fixed: `VAR02` and `VAR03` were converted twice, if a role like `value.temperature` was set. Without such a role they are still shown in °C\nFixed: the scan wrote the values of the variables without the conversion of their role\nThe value of a variable is read again from the module, when its role is changed",
+        "de": "Behoben: VAR02 und VAR03 wurden zweimal konvertiert, wenn Rollen wie Wert gesetzt waren. Ohne diese Rolle sind sie immer noch in °C\nBehoben: Der Scan schrieb die Variablenwerte ohne Umwandlung ihrer Rolle\nDer Wert einer Variablen wird bei Rollenwechsel erneut aus dem Modul gelesen",
+        "ru": "Исправлено: `VAR02` и `VAR03` конвертировались дважды, если была установлена роль типа `value.temperature`. Без такой роли они по-прежнему отображаются в градусах Цельсия\nИсправлено: при сканировании записывались значения переменных без преобразования их роли\nЗначение переменной снова считывается из модуля при изменении ее роли",
+        "pt": "Corrigido: `VAR02` e `VAR03` eram convertidos duas vezes com a função `value.temperature`. Sem esse papel, ainda são mostrados em °C\nFixo: o scan gravou os valores das variáveis sem a conversão de sua função\nO valor de uma variável é lido novamente no módulo ao mudar sua função",
+        "nl": "Opgelost: `VAR02` en `VAR03` zijn twee keer geconverteerd, als een rol zoals `value.temperature` was ingesteld. Zonder zo'n rol worden ze nog steeds weergegeven in °C.\nOpgelost: de scan schreef de waarden van de variabelen zonder hun rol om te zetten\nDe waarde van een variabele wordt opnieuw uit de module gelezen wanneer de rol ervan wordt gewijzigd",
+        "fr": "Corrigé : VAR02 et VAR03 étaient convertis deux fois si un rôle tel que value.temperature était défini. Sans ce rôle, ils sont toujours diffusés en °C\nCorrigé : le scan écrivait les valeurs des variables sans convertir leur rôle\nLa valeur d'une variable est relue depuis le module lorsque son rôle est modifié",
+        "it": "Risolto: `VAR02` e `VAR03` erano convertiti due volte, se era impostato `value.temperature`. Senza tale ruolo sono ancora in °C\nRisolto: la scansione scriveva i valori delle variabili senza convertirne il ruolo\nIl valore di una variabile si rilegge dal modulo quando cambia ruolo",
+        "es": "Corregido: VAR02 y VAR03 se convertían dos veces si se establecía un rol como «valor.temperatura». Sin ese papel, todavía se muestran en °C\nCorregido: el escaneo escribía los valores de las variables sin convertir su función\nEl valor de una variable se vuelve a leer en el módulo cuando se cambia su función",
+        "pl": "Naprawiono: `VAR02` i `VAR03` zostały przekonwertowane dwukrotnie, jeśli ustawiono rolę typu „wartość.temperatura”. Bez takiej roli są nadal pokazywane w °C\nNaprawiono: skan zapisał wartości zmiennych bez konwersji ich roli\nWartość zmiennej jest odczytywana ponownie z modułu, gdy jej rola zostanie zmieniona",
+        "uk": "Виправлено: `VAR02` і `VAR03` були перетворені двічі, якщо була встановлена така роль, як `значення.temperatur`. Без такої ролі вони все ще показуються в°C\nВиправлено: сканування записало значення змінних без перетворення їх ролі\nЗначення змінної зчитується знову з модуля, коли її роль змінюється",
+        "zh-cn": "修复：如果设置了像 value.temperature 这样的角色，则 VAR02` 和 `VAR03` 会被转换两次。如果没有这样的作用，它们仍然以°C显示\n修复：扫描在没有转换其角色的情况下写入了变量的值\n当变量的角色发生变化时，将再次从模块中读取变量的值"
+      },
       "4.0.0-beta.2": {
         "en": "Fixed: commands could get stuck in the queue, if several commands waited behind a command, that waits for an answer\nFixed: variables of modules with a firmware before 170206 (only 3 variables) were not created. These modules must be scanned again (#22)\nAdded option to read the variables of all modules cyclically (#22)\nValues without the number of the variable are ignored now. Before, the adapter logged an error for `MEASURES.MEASURE`",
         "de": "Behoben: Befehle konnten in der Warteschlange hängen, wenn mehrere Befehle auf Antwort warten\nBehoben: Modulvariablen mit Firmware vor 170206 (nur 3 Variablen) wurden nicht erstellt. Die Module müssen erneut gescannt werden (#22)\nOption zum zyklischen Lesen aller Modulvariablen hinzugefügt (#22)\nWerte ohne Variablennummer werden jetzt ignoriert. Vorher meldete der Adapter einen Fehler für `MEASURES.MEASURE`",
@@ -106,19 +119,6 @@
         "pl": "Dodano tłumaczenia",
         "uk": "Додано переклади",
         "zh-cn": "添加翻译"
-      },
-      "2.0.2": {
-        "en": "Corrected checking of licenses with license manager",
-        "de": "Korrigierte Überprüfung von Lizenzen mit Lizenzmanager",
-        "ru": "Исправлена проверка лицензий с лицензионным менеджером",
-        "pt": "Verificação correta de licenças com gerenciador de licenças",
-        "nl": "Gecorrigeerde controle van licenties met licentiebeheerder",
-        "fr": "Vérification corrigée des licences avec le gestionnaire de licence",
-        "it": "Controllo corretto delle licenze con il gestore di licenze",
-        "es": "Comprobación corregida de licencias con gestor de licencias",
-        "pl": "Poprawione sprawdzanie licencji z menedżerem licencji",
-        "uk": "Виправлена перевірка ліцензійного менеджера",
-        "zh-cn": "与许可证管理者核对许可证"
       }
     },
     "platform": "Javascript/Node.js",

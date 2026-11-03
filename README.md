@@ -112,7 +112,7 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0-beta.3 (2026-11-03)
 - (bluefox) Fixed: `VAR02` and `VAR03` were converted twice, if a role like `value.temperature` was set. Without such a role they are still shown in °C
 - (bluefox) Fixed: the scan wrote the values of the variables without the conversion of their role
 - (bluefox) The value of a variable is read again from the module, when its role is changed
@@ -143,9 +143,6 @@ Every found module has the following actions:
 - (bluefox) Fixed parsing of logic operation (SUM) status messages. Invalid objects like `SUMS.SUMSUM1000_undefined` were created, and the adapter ran into an endless loop with high CPU load. The invalid objects are deleted on start. New states are `SUMS.SUM01`...`SUMS.SUM04`.
 - (bluefox) Migrated the GitHub workflow to the ioBroker testing actions with npm trusted publishing
 - (bluefox) Removed unused dependency `jsonwebtoken` and modernized the code
-
-### 3.0.1 (2025-03-24)
-* (bluefox) License was changed to MIT. The adapter is now free of charge.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
