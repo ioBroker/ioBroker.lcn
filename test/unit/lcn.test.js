@@ -194,6 +194,27 @@ describe('Connection with simulated PCHK', function () {
         assert.strictEqual(error, 'Authentication failure');
     });
 
+    it('should send all commands without callback, that wait behind a command with callback', async () => {
+        const sim = await startPchk();
+        const conn = new Connection(params(sim.port));
+        await new Promise(resolve => conn.once('connected', resolve));
+        // This command is never answered, the commands behind it wait till its timeout
+        const pending = conn.commandPromise('>M000099.NMN1', /^never$/, 300, true);
+        conn.command('>M000099.A');
+        conn.command('>M000099.B');
+        conn.command('>M000099.C');
+        await pending;
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => conn.destroy(false, resolve));
+        sim.sockets.forEach(s => s.destroy());
+        sim.server.close();
+        // Before 4.0.0 only ">M000099.A" was sent
+        assert.deepStrictEqual(
+            sim.received.filter(line => line.startsWith('>M000099')),
+            ['>M000099.NMN1', '>M000099.A', '>M000099.B', '>M000099.C'],
+        );
+    });
+
     it('should log in again after the connection was closed', async () => {
         const sim = await startPchk();
         const conn = new Connection(params(sim.port));

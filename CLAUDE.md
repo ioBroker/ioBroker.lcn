@@ -59,7 +59,7 @@ There is deliberately **no `prepare` script** — `npm ci`/`npm install` does no
 
 State machine `CONNECTING → WAIT_PROMPT (LCN-PCK/IP) → WAIT_USER → WAIT_PASS → WAIT_AUTH_OK → WAIT_CONNECTED ($io:#LCN:connected) → READY`. After connect it sets the analog mode and the decimal mode (`!CHD`), then emits `connected`.
 
-- Commands are **strictly serialized**: one command is in flight (`WAIT_RESPONSE`), it waits for its `regAnswer` or times out. Lines that do not answer the current command are emitted as `data`.
+- Commands **with callback** are strictly serialized: one command is in flight (`WAIT_RESPONSE`), it waits for its `regAnswer` or times out. Lines that do not answer the current command are emitted as `data`. Commands **without callback** are sent and the queue continues immediately (before 4.0.0 the queue got stuck when several of them waited behind a command with callback).
 - `ignoreTimeoutError` resolves with `undefined` instead of rejecting — used by the scan for optional answers.
 - Ping (`^ping<n>`) every `pingInterval`; a missing/mismatched answer reconnects.
 - `destroy(isReconnect, cb)`: with `isReconnect` it schedules a reconnect after `reconnectTimeout`.
