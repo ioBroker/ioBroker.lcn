@@ -1,5 +1,5 @@
 const assert = require('node:assert');
-const { CMDS, COMMANDS } = require('../../lib/cmds');
+const { CMDS, COMMANDS } = require('../../build/lib/cmds');
 
 describe('CMDS.parseStatus', () => {
     it('should parse status of logic operations (SUM)', () => {

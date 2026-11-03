@@ -19,7 +19,9 @@ This adapter allows to connect Local Control Network [LCN](https://www.lcn.eu/) 
 
 **Don't forget that `ioBroker.lcn` will block one LCN Connection License.**
 
-The configuration and modules will be automatically detected by scan, that must be triggered manually from the configuration dialog and can be repeated any time again.
+The configuration and modules will be automatically detected by scan, that must be triggered manually from the "Modules" tab of the configuration dialog and can be repeated any time again.
+
+Requires admin >= 7.8.23 (the "Modules" tab uses the device manager).
 
 ## Types
 The following read and write groups are supported:
@@ -41,10 +43,13 @@ To apply the valid convert functions to variables, the variables must have the v
 - **value.sun.elevation** - sun elevation
 
 ## Display
-For every device you can activate if it has display or not.
+For every device you can activate if it has display or not (device manager: "Module settings").
 
 ## Regulator (Regler)
-For every device you can activate if it has regulators or not.
+For every device you can activate if it has regulators or not (device manager: "Module settings").
+
+## Output relays
+For every device you can define how many output relays (0-8) must be created (device manager: "Module settings").
 
 ## Settings
 - Reconnect interval(sec) - how often the adapter tries to connect. Default every 30 seconds. 
@@ -78,9 +83,17 @@ For every device you can activate if it has regulators or not.
 ```
 
 ## How to use
-After the first start, the devices must be scanned. It can be done in the configuration dialog with scan button
+After the first start, the devices must be scanned. Open the "Modules" tab of the configuration dialog and press the scan button (magnifier icon) of the device manager.
+Enter the highest module address that must be scanned (e.g. `250`) or a range like `5-30`.
 
-![scan](img/scanButton.png)
+Every found module has the following actions:
+- **Module settings** - number of output relays, display and regulators
+- **Scan again** - read name, comment, serial number and states of this module again
+
+## Message API
+- `sendTo('lcn.0', 'scan', { max: '250' }, result => ...)` - scan the bus (`max` can be `"max"` or `"min-max"`). Result: `{ total, _new }` or `{ error }`
+- `sendTo('lcn.0', 'getAll', null, devices => ...)` - list of all modules `[{ id, common, native }]`
+- `lcn.0.scan.manual` - write `*` to read the states of all modules or `S0:6` to read the status of segment 0, module 6
 
 ## ToDO
 - Configuration dialog to define type of variables.
@@ -90,6 +103,12 @@ After the first start, the devices must be scanned. It can be done in the config
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
+### **WORK IN PROGRESS**
+- (bluefox) Breaking change: Adapter requires admin >= 7.8.23 now
+- (bluefox) The adapter was refactored to TypeScript
+- (bluefox) The configuration dialog was migrated to JsonConfig. The modules are scanned and configured in the device manager
+
+
 ### 3.0.2 (2026-11-03)
 - (copilot) Adapter requires node.js >= 22.19.0 now
 - (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.

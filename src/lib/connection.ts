@@ -1,22 +1,23 @@
 /*
  * Copyright (c) 2018-2024 bluefox <dogafox@gmail.com> CC-BY-NC-4.0
- * Copyright (c) 2025 bluefox <dogafox@gmail.com> MIT
- *
+ * Copyright (c) 2025-2026 bluefox <dogafox@gmail.com> MIT
  */
-'use strict';
+import { EventEmitter } from 'node:events';
+import { createConnection, type Socket } from 'node:net';
+import { ANALOG_MODES } from './analogModes';
+import type { ConnectionOptions, LcnLogger } from './types';
 
-const { EventEmitter } = require('node:events');
-const net = require('node:net');
-const ANALOG_MODES = require('./analogModes');
+// The library uses its own timers, so it can be used without the adapter.
+// All of them are stopped in destroy().
 
-const logger = {
-    log: data => console.log(data),
-    debug: data => console.log(data),
-    warn: data => console.warn(data),
-    error: data => console.error(data),
+const defaultLogger: LcnLogger = {
+    info: (data: string): void => console.log(data),
+    debug: (data: string): void => console.log(data),
+    warn: (data: string): void => console.warn(data),
+    error: (data: string): void => console.error(data),
 };
 
-const STATES = {
+export const STATES = {
     CONNECTING: 0,
     WAIT_PROMPT: 1, // LCN-PCK/IP 1.0
     WAIT_USER: 2, // Username:
@@ -26,7 +27,9 @@ const STATES = {
     READY: 6,
     WAIT_RESPONSE: 7, // wait response for command
     DISCONNECT: 8, // Disconnecting
-};
+} as const;
+
+export type ConnectionState = (typeof STATES)[keyof typeof STATES];
 
 const PROMPT_VERSION = /LCN-PCK\//;
 const PROMPT_USERNAME = /^Username:$/;
@@ -40,7 +43,12 @@ const PROMPT_ERROR_PARAM = /^\((\w\w):p-error\)$/;
 const PROMPT_ERROR_LICENSE = /^\$err:\(license\?\)$/;
 const PROMPT_MEASURE_UPDATE = /^[%:]M\d\d\d\d\d\d/;
 
-const COMMANDS = {
+interface ConnectionCommand {
+    cmd: string;
+    regAnswer: RegExp;
+}
+
+const COMMANDS: Record<string, ConnectionCommand> = {
     SET_OUTPUT_MODE_0_50_PERCENT: { cmd: '!OM0P', regAnswer: /^\(0\.\.50-mode percent\)$/ },
     SET_OUTPUT_MODE_0_50_NATIVE: { cmd: '!OM0N', regAnswer: /^\(0\.\.50-mode native\)$/ },
     SET_OUTPUT_MODE_0_200_PERCENT: { cmd: '!OM1P', regAnswer: /^\(0\.\.200-mode percent\)$/ },
@@ -49,18 +57,44 @@ const COMMANDS = {
     PING: { cmd: '^ping', regAnswer: /^\^ping(\d+)-?/ }, // ^ping1<LF>
 };
 
-function formatNumber(addr) {
-    addr = parseInt(addr, 10);
-    if (addr < 10) {
-        return `00${addr}`;
+/** Called with an error text or with the received answer */
+export type CommandCallback = (err: string | null, data?: string) => void;
+
+interface CommandTask {
+    cmd: string;
+    regAnswer?: RegExp;
+    ts: number;
+    cb?: CommandCallback;
+    timeout?: number;
+    ignoreTimeoutError?: boolean;
+    timer?: NodeJS.Timeout | null;
+}
+
+interface ConnectionParams {
+    port: number;
+    host: string;
+    user: string;
+    password: string;
+    reconnectTimeout: number;
+    defaultTimeout: number;
+    pingInterval: number;
+    pingTimeout: number;
+    analogMode: number;
+    connectTimeout: number;
+}
+
+function formatNumber(addr: number | string): string {
+    const num = parseInt(addr.toString(), 10);
+    if (num < 10) {
+        return `00${num}`;
     }
-    if (addr < 100) {
-        return `0${addr}`;
+    if (num < 100) {
+        return `0${num}`;
     }
-    if (addr > 255) {
-        throw new Error(`Invalid address ${addr}`);
+    if (num > 255) {
+        throw new Error(`Invalid address ${num}`);
     }
-    return addr.toString();
+    return num.toString();
 }
 
 // events
@@ -69,8 +103,8 @@ function formatNumber(addr) {
 // - state
 // - error
 // - data
-// - version
-// - serial
+// - end
+// - close
 
 // Enable decimal mode
 // !OM0P // Output-Mode 0..50 percent
@@ -86,13 +120,32 @@ function formatNumber(addr) {
 // NMt
 // SN
 
-// define a constructor (object) and inherit EventEmitter functions
-class Connection extends EventEmitter {
-    static state2text(state) {
-        return Object.keys(STATES).find(s => STATES[s] === state) || `UNKNOWN(${state})`;
+export class Connection extends EventEmitter {
+    private readonly params: ConnectionParams;
+    private readonly logger: LcnLogger;
+    private readonly debug: boolean;
+    public readonly resolveName: (segment: number, module: number) => string;
+
+    private connectTimeout: NodeJS.Timeout | null = null;
+    private stateTimeout: NodeJS.Timeout | null = null;
+    private pingTimeout: NodeJS.Timeout | null = null;
+    private pingIndex = 0;
+    private requests: CommandTask[] = [];
+    private processingCommand: CommandTask | null = null;
+    /** null after the socket was closed (see the handlers in connect()) */
+    private buffer: string | null = '';
+    private shutdown = false;
+    private state: ConnectionState = STATES.CONNECTING;
+    private socket: Socket | null = null;
+    private ready = false;
+
+    static state2text(state: number): string {
+        return (
+            Object.keys(STATES).find(s => STATES[s as keyof typeof STATES] === state) || `UNKNOWN(${state.toString()})`
+        );
     }
 
-    constructor(options) {
+    constructor(options: ConnectionOptions) {
         super();
 
         this.params = {
@@ -110,27 +163,18 @@ class Connection extends EventEmitter {
 
         this.resolveName =
             options.resolveName ||
-            function (segment, module) {
-                return `S${formatNumber(segment)}.M${formatNumber(module)}`;
-            };
+            ((segment: number, module: number): string => `S${formatNumber(segment)}.M${formatNumber(module)}`);
         this.debug = !!options.debug;
 
         if (this.params.pingInterval < this.params.pingTimeout * 2) {
             this.params.pingInterval = this.params.pingTimeout * 10;
         }
 
-        this.logger = options.logger || logger;
-        this.connectTimeout = null;
-        this.requests = [];
-        this.buffer = '';
-        this.shutdown = false;
-        this.state = STATES.CONNECTING;
-        this.pingTimeout = null;
-        this.pingIndex = 0;
+        this.logger = options.logger || defaultLogger;
         this.connect();
     }
 
-    connect() {
+    connect(): void {
         this.ready = false;
 
         if (this.connectTimeout) {
@@ -138,42 +182,47 @@ class Connection extends EventEmitter {
             this.connectTimeout = null;
         }
 
-        this.socket = net.createConnection(this.params, () => {
+        const socket = createConnection(this.params, () => {
             // on Connect
             this._changeState(STATES.WAIT_PROMPT, this.params.connectTimeout);
-            this.pingTimeout = this.pingTimeout || setTimeout(() => this._sendPing(), this.params.pingInterval);
+            this.pingTimeout ||= setTimeout(() => this._sendPing(), this.params.pingInterval);
         });
+        this.socket = socket;
 
-        this.socket.on('error', error => {
+        socket.on('error', (error: Error): void => {
             this.buffer = null;
             if (this.socket) {
                 this.emit('error', error);
-                this.socket.destroy(true);
+                this.socket.destroy();
                 this.socket = null;
             }
         });
 
-        this.socket.on('end', () => {
+        socket.on('end', (): void => {
             this.buffer = null;
             if (this.socket) {
-                this.socket.destroy(true);
+                this.socket.destroy();
                 this.socket = null;
                 this.emit('end');
             }
-            !this.shutdown && this.destroy(true);
+            if (!this.shutdown) {
+                this.destroy(true);
+            }
         });
 
-        this.socket.on('close', () => {
+        socket.on('close', (): void => {
             this.buffer = null;
             if (this.socket) {
-                this.socket.destroy(true);
+                this.socket.destroy();
                 this.socket = null;
                 this.emit('close');
             }
-            !this.shutdown && this.destroy(true);
+            if (!this.shutdown) {
+                this.destroy(true);
+            }
         });
 
-        this.socket.on('data', data => {
+        socket.on('data', (data: Buffer | null): void => {
             if (this.shutdown) {
                 return;
             }
@@ -182,7 +231,8 @@ class Connection extends EventEmitter {
                 return;
             }
 
-            this.buffer += data.toString();
+            // Note: after an error the buffer is null and "null" is prepended to the first line (sic)
+            this.buffer = `${this.buffer}${data.toString()}`;
             const lines = this.buffer.split(/\r\n|\n\r|\n|\r/); // any combinations of
             this.buffer = lines[lines.length - 1] || ''; // save the last not full command
 
@@ -194,7 +244,7 @@ class Connection extends EventEmitter {
         });
     }
 
-    _onError(err, reconnect) {
+    private _onError(err: string, reconnect?: boolean): void {
         this.emit('error', err);
         this.logger.error(`[CONN] ${err}. Reconnecting...`);
 
@@ -203,7 +253,7 @@ class Connection extends EventEmitter {
         }
     }
 
-    _changeState(newState, timeout) {
+    private _changeState(newState: ConnectionState, timeout?: number): void {
         if (newState !== this.state) {
             if (newState === STATES.CONNECTING && this.state !== STATES.CONNECTING) {
                 this.emit('disconnected');
@@ -217,6 +267,7 @@ class Connection extends EventEmitter {
 
             if (this.stateTimeout) {
                 clearTimeout(this.stateTimeout);
+                this.stateTimeout = null;
             }
             if (timeout) {
                 this.stateTimeout = setTimeout(
@@ -232,20 +283,24 @@ class Connection extends EventEmitter {
         }
     }
 
-    _resetPingTimer() {
+    private _resetPingTimer(): void {
         if (this.pingTimeout) {
             clearTimeout(this.pingTimeout);
             this.pingTimeout = setTimeout(() => this._sendPing(), this.params.pingInterval);
         }
     }
 
-    _sendPing() {
+    private _sendPing(): void {
         this.pingIndex++;
         this.pingIndex = this.pingIndex % 100;
         this.pingTimeout = null;
-        this.commandPromise(COMMANDS.PING.cmd + this.pingIndex, COMMANDS.PING.regAnswer, this.params.pingTimeout)
+        this.commandPromise(
+            COMMANDS.PING.cmd + this.pingIndex.toString(),
+            COMMANDS.PING.regAnswer,
+            this.params.pingTimeout,
+        )
             .then(data => {
-                const m = data.match(COMMANDS.PING.regAnswer);
+                const m = data?.match(COMMANDS.PING.regAnswer);
                 if (!m || parseInt(m[1], 10) !== this.pingIndex) {
                     this._onError(`Ping mismatch expected ${this.pingIndex}, received ${data}`, true);
                 } else {
@@ -255,8 +310,10 @@ class Connection extends EventEmitter {
             .catch(() => this._onError('Ping timeout', true));
     }
 
-    _processLine(data) {
-        this.debug && this.logger.debug(`[CONN] received: ${data}`);
+    private _processLine(data: string): void {
+        if (this.debug) {
+            this.logger.debug(`[CONN] received: ${data}`);
+        }
 
         switch (this.state) {
             case STATES.CONNECTING:
@@ -264,7 +321,7 @@ class Connection extends EventEmitter {
                 break;
 
             case STATES.WAIT_PROMPT:
-                if (data.match(PROMPT_VERSION)) {
+                if (PROMPT_VERSION.test(data)) {
                     this._changeState(STATES.WAIT_USER, this.params.connectTimeout);
                 } else {
                     this._onError(`Invalid data ${data} while waiting for VERSION`, true);
@@ -272,50 +329,47 @@ class Connection extends EventEmitter {
                 break;
 
             case STATES.WAIT_USER:
-                if (data.match(PROMPT_USERNAME)) {
+                if (PROMPT_USERNAME.test(data)) {
                     this._changeState(STATES.WAIT_PASS, this.params.connectTimeout);
 
                     // send username
-                    this._send(this.params.user)
-                        .then(() => {})
-                        .catch(e => this._onError(e, true));
+                    this._send(this.params.user).catch(e => this._onError(e, true));
                 } else {
-                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME}`, true);
+                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME.toString()}`, true);
                 }
                 break;
 
             case STATES.WAIT_PASS:
-                if (data.match(PROMPT_PASSWORD)) {
+                if (PROMPT_PASSWORD.test(data)) {
                     this._changeState(STATES.WAIT_AUTH_OK, this.params.connectTimeout);
 
                     // send password
-                    this._send(this.params.password)
-                        .then(() => {})
-                        .catch(e => this._onError(e, true));
+                    this._send(this.params.password).catch(e => this._onError(e, true));
                 } else {
-                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME}`, true);
+                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME.toString()}`, true);
                 }
                 break;
 
             case STATES.WAIT_AUTH_OK:
-                if (data.match(PROMPT_AUTH_OK)) {
+                if (PROMPT_AUTH_OK.test(data)) {
                     this._changeState(STATES.WAIT_CONNECTED, this.params.connectTimeout);
-                } else if (data === PROMPT_AUTH_FAILED) {
+                } else if ((data as unknown) === PROMPT_AUTH_FAILED) {
+                    // Note: a string is compared with a RegExp here, so this branch is never taken (sic)
                     this._onError(`Authentication failure`);
                 } else {
-                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME}`, true);
+                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_USERNAME.toString()}`, true);
                 }
                 break;
 
             case STATES.WAIT_CONNECTED:
-                if (data.match(PROMPT_ERROR_LICENSE)) {
+                if (PROMPT_ERROR_LICENSE.test(data)) {
                     this._onError(`License error received!`, true);
-                } else if (data.match(PROMPT_CONNECTED) || data.match(PROMPT_MEASURE_UPDATE)) {
+                } else if (PROMPT_CONNECTED.test(data) || PROMPT_MEASURE_UPDATE.test(data)) {
                     // Old versions send data immediately without connect ack
                     // send 0-50% mode
                     this._changeState(STATES.READY);
 
-                    let modeCommand;
+                    let modeCommand: ConnectionCommand;
                     switch (this.params.analogMode) {
                         case ANALOG_MODES.IOB100toLCN50:
                             modeCommand = COMMANDS.SET_OUTPUT_MODE_0_50_PERCENT;
@@ -339,14 +393,14 @@ class Connection extends EventEmitter {
                         .then(() => this.commandPromiseEx(COMMANDS.SET_DECIMAL_MODE))
                         .then(() => {
                             this.emit('connected');
-                            if (data.match(PROMPT_MEASURE_UPDATE)) {
+                            if (PROMPT_MEASURE_UPDATE.test(data)) {
                                 // received some data
                                 this.emit('data', data);
                             }
                         })
                         .catch(err => this._onError(err, true));
                 } else {
-                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_CONNECTED}`);
+                    this._onError(`Invalid data ${data} while waiting for ${PROMPT_CONNECTED.toString()}`);
                 }
                 break;
 
@@ -357,19 +411,15 @@ class Connection extends EventEmitter {
                     this._onError(`Invalid state WAIT_RESPONSE, but no command`);
                 }
 
-                if (data.match(PROMPT_DISCONNECTED)) {
+                if (PROMPT_DISCONNECTED.test(data)) {
                     this._changeState(STATES.WAIT_CONNECTED);
-                } else if (data.match(PROMPT_ERROR_LICENSE)) {
+                } else if (PROMPT_ERROR_LICENSE.test(data)) {
                     this._onError(`License error received!`, true);
-                } else if (this.processingCommand && data.match(PROMPT_ERROR)) {
+                } else if (this.processingCommand && PROMPT_ERROR.test(data)) {
                     this._onCommandFinish('cannot process');
-                } else if (this.processingCommand && data.match(PROMPT_ERROR_PARAM)) {
+                } else if (this.processingCommand && PROMPT_ERROR_PARAM.test(data)) {
                     this._onCommandFinish('invalid parameter');
-                } else if (
-                    this.processingCommand &&
-                    this.processingCommand.regAnswer &&
-                    data.match(this.processingCommand.regAnswer)
-                ) {
+                } else if (this.processingCommand?.regAnswer && this.processingCommand.regAnswer.test(data)) {
                     this._onCommandFinish(null, data);
                 } else {
                     // received some data
@@ -384,44 +434,42 @@ class Connection extends EventEmitter {
         }
     }
 
-    commandPromiseEx(cmd, timeout, ignoreTimeoutError) {
+    commandPromiseEx(
+        cmd: ConnectionCommand,
+        timeout?: number,
+        ignoreTimeoutError?: boolean,
+    ): Promise<string | undefined> {
         return new Promise((resolve, reject) =>
             this.command(cmd.cmd, cmd.regAnswer, timeout, ignoreTimeoutError, (err, data) =>
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 err ? reject(err) : resolve(data),
             ),
         );
     }
 
-    commandEx(cmd, timeout, ignoreTimeoutError, cb) {
-        if (typeof ignoreTimeoutError === 'function') {
-            cb = ignoreTimeoutError;
-            ignoreTimeoutError = false;
-        }
-        if (typeof timeout === 'function') {
-            cb = timeout;
-            timeout = this.params.defaultTimeout;
-        }
-        return this.command(cmd.cmd, cmd.regAnswer, timeout, ignoreTimeoutError, cb);
-    }
-
-    commandPromise(cmd, regAnswer, timeout, ignoreTimeoutError) {
+    commandPromise(
+        cmd: string,
+        regAnswer?: RegExp,
+        timeout?: number,
+        ignoreTimeoutError?: boolean,
+    ): Promise<string | undefined> {
+        // The promise is rejected with the plain error text (e.g. 'timeout'), the callers compare it (sic)
         return new Promise((resolve, reject) =>
             this.command(cmd, regAnswer, timeout, ignoreTimeoutError, (err, data) =>
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 err ? reject(err) : resolve(data),
             ),
         );
     }
 
-    command(cmd, regAnswer, timeout, ignoreTimeoutError, cb) {
-        if (typeof ignoreTimeoutError === 'function') {
-            cb = ignoreTimeoutError;
-            ignoreTimeoutError = false;
-        }
-        if (typeof timeout === 'function') {
-            cb = timeout;
-            timeout = this.params.defaultTimeout;
-        }
-        const task = {
+    command(
+        cmd: string,
+        regAnswer?: RegExp,
+        timeout?: number,
+        ignoreTimeoutError?: boolean,
+        cb?: CommandCallback,
+    ): void {
+        const task: CommandTask = {
             cmd,
             regAnswer,
             ts: Date.now(),
@@ -442,16 +490,23 @@ class Connection extends EventEmitter {
             this.requests.push(task);
         }
 
-        this.requests.length === 1 && this._processCommands();
+        if (this.requests.length === 1) {
+            this._processCommands();
+        }
     }
 
-    _onCommandFinish(err, data) {
-        this.processingCommand.timer && clearTimeout(this.processingCommand.timer);
-        if (typeof this.processingCommand.cb === 'function') {
-            if (this.processingCommand.ignoreTimeoutError && err === 'timeout') {
-                this.processingCommand.cb(null, data);
-            } else {
-                this.processingCommand.cb(err, data);
+    private _onCommandFinish(err: string | null, data?: string): void {
+        const processingCommand = this.processingCommand;
+        if (processingCommand) {
+            if (processingCommand.timer) {
+                clearTimeout(processingCommand.timer);
+            }
+            if (typeof processingCommand.cb === 'function') {
+                if (processingCommand.ignoreTimeoutError && err === 'timeout') {
+                    processingCommand.cb(null, data);
+                } else {
+                    processingCommand.cb(err, data);
+                }
             }
         }
         this.processingCommand = null;
@@ -459,7 +514,7 @@ class Connection extends EventEmitter {
         this._changeState(STATES.READY);
     }
 
-    _processCommands() {
+    private _processCommands(): void {
         if (!this.requests.length) {
             return;
         }
@@ -467,23 +522,20 @@ class Connection extends EventEmitter {
             return;
         }
 
-        const cmd = this.requests.shift();
+        const cmd = this.requests.shift()!;
         cmd.ts = Date.now();
         this.processingCommand = cmd;
 
         if (cmd.cb) {
-            cmd.timer = setTimeout(
-                _cmd => {
-                    _cmd.timer = null;
-                    if (this.state === STATES.WAIT_RESPONSE && this.processingCommand === cmd) {
-                        this._onCommandFinish('timeout');
-                    } else {
-                        _cmd.cb('timeout');
-                    }
-                },
-                cmd.timeout || this.params.defaultTimeout,
-                cmd,
-            );
+            const cb = cmd.cb;
+            cmd.timer = setTimeout(() => {
+                cmd.timer = null;
+                if (this.state === STATES.WAIT_RESPONSE && this.processingCommand === cmd) {
+                    this._onCommandFinish('timeout');
+                } else {
+                    cb('timeout');
+                }
+            }, cmd.timeout || this.params.defaultTimeout);
 
             this._changeState(STATES.WAIT_RESPONSE);
 
@@ -497,11 +549,9 @@ class Connection extends EventEmitter {
         }
     }
 
-    _send(cmd) {
-        if (typeof cmd === 'object') {
-            cmd = cmd.cmd;
-        }
+    private _send(cmd: string): Promise<void> {
         if (!cmd) {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             return Promise.reject('No data');
         }
         if (cmd[cmd.length - 1] !== '\n') {
@@ -513,12 +563,13 @@ class Connection extends EventEmitter {
                 this._resetPingTimer();
                 this.socket.write(cmd, () => resolve());
             } else {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 reject('Socket not exists while sending');
             }
         });
     }
 
-    destroy(isReconnect, cb) {
+    destroy(isReconnect?: boolean, cb?: () => void): void {
         this._changeState(STATES.CONNECTING);
 
         this.shutdown = true;
@@ -533,32 +584,28 @@ class Connection extends EventEmitter {
         }
 
         if (this.socket) {
-            this.socket.destroy(cb);
-            cb = null;
+            this.socket.destroy();
             this.socket = null;
-        } else {
-            cb && cb();
         }
+        cb?.();
 
-        isReconnect &&
+        if (isReconnect) {
             setTimeout(() => {
                 this.shutdown = false;
-                if (!this.connectTimeout) {
-                    this.connectTimeout = setTimeout(() => this.connect(), this.params.reconnectTimeout);
-                }
+                this.connectTimeout ||= setTimeout(() => this.connect(), this.params.reconnectTimeout);
             }, 500);
+        }
     }
 
-    isConnected() {
+    isConnected(): boolean {
         return this.state >= STATES.READY && this.state !== STATES.DISCONNECT;
     }
 
-    getState() {
+    getState(): ConnectionState {
         return this.state;
     }
-}
 
-module.exports = {
-    Connection,
-    STATES,
-};
+    isReady(): boolean {
+        return this.ready;
+    }
+}
