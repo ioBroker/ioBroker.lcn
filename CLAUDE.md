@@ -40,6 +40,7 @@ There is deliberately **no `prepare` script** — `npm ci`/`npm install` does no
 | `src/lib/DeviceManagement.ts` | device manager (`@iobroker/dm-utils`) shown in the "Modules" tab |
 | `src/lib/i18n.ts` | `t(key, ...args)` - device manager texts, read from `admin/i18n/*.json` at runtime |
 | `src/lib/analogModes.ts` | the 4 analog modes (`!OM0P`, `!OM0N`, `!OM1P`, `!OM1N`) |
+| `src/lib/variables.ts` | `convertVariable(raw, role, input)` - conversion of the variables depending on the role |
 | `src/lib/types.ts` | `LcnState` (one parsed answer), `FoundModule`, `LcnDeviceNative`, options |
 | `src/lib/adapter-config.d.ts` | augments `ioBroker.AdapterConfig` |
 | `admin/jsonConfig.json` | the configuration dialog (tabs: main, advanced, modules = device manager) |
@@ -88,7 +89,7 @@ One scan covers one segment. Segment `0` is the own segment (that is what goes o
 - Updates for states that do not exist yet are created on the fly (`createStateOnTheFly()`). The generated ID **must** equal the requested one, otherwise `updateVariable` would recurse endlessly (#119).
 - `recalculateRelays()` creates/deletes the states that cannot be detected: output relays, display lines, regulator outputs/locks. It runs on start and (debounced 1 s) on every device object change — so changing the device `native` is how the device manager applies the module settings.
 - `combinedRelays`: input and output relay are the same state (`RELAYS.RELAYnn` with `native.command = RELAY_OUT`).
-- VAR conversion depends on the **role** the user sets on the state (`value.temperature`, `value.brightness`, ...), see `updateVariable()`.
+- VAR values are **raw** in `LcnState` (the parser does not convert them). `updateVariable()` converts them with `convertVariable()` depending on the **role** the user sets on the state (`value.temperature`, `value.brightness`, ...). Without such a role `VAR02`/`VAR03` are shown in °C (compatibility: before 4.0.0 the parser converted them always, so a role converted them twice). The scan writes the variables through `updateVariable()` too. A changed role of a VAR state triggers `readVariables()` for this variable (`onObjectChange`).
 
 ### Messages
 

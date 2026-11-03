@@ -86,12 +86,46 @@ describe('CMDS firmware before 170206', () => {
             ...CMDS.parseVariables('%M000020.A00101205'),
         ]);
         assert.deepStrictEqual(CMDS.parseTypelessVariable('%M000020.01180', 2), [
-            { segment: 0, module: 20, type: COMMANDS.VAR.name, status: 18, input: 2 },
+            { segment: 0, module: 20, type: COMMANDS.VAR.name, status: 1180, input: 2 },
         ]);
         assert.deepStrictEqual(CMDS.parseTypelessSetValue('%M000020.33978', 2), [
             { segment: 0, module: 20, type: COMMANDS.REGULATOR_OUT.name, status: 21, input: '2' },
             { segment: 0, module: 20, type: COMMANDS.REGULATOR_LOCK_OUT.name, status: true, input: '2' },
         ]);
+    });
+});
+
+describe('Conversion of variables', () => {
+    const { convertVariable } = require('../../build/lib/variables');
+
+    it('should deliver raw values from the parser', () => {
+        assert.deepStrictEqual(CMDS.parseVariables('%M000007.A00201180'), [
+            { segment: 0, module: 7, type: COMMANDS.VAR.name, status: 1180, input: 2 },
+        ]);
+    });
+
+    it('should convert VAR02 and VAR03 only once', () => {
+        // Before 4.0.0 the parser converted VAR02/VAR03 and the role converted them again: (18 - 1000) / 10
+        assert.deepStrictEqual(convertVariable(1180, 'value.temperature', 2), { value: 18, unit: '°C' });
+        assert.deepStrictEqual(convertVariable(1190, 'value.temperature', 3), { value: 19, unit: '°C' });
+        // without a special role they are still shown in °C, as before
+        assert.deepStrictEqual(convertVariable(1180, 'value', 2), { value: 18 });
+        assert.deepStrictEqual(convertVariable(1190, undefined, 3), { value: 19 });
+        // other roles get the raw value
+        assert.deepStrictEqual(convertVariable(123, 'value.speed.wind', 2), { value: 12.3, unit: 'm/s' });
+    });
+
+    it('should convert the other variables by their role', () => {
+        assert.deepStrictEqual(convertVariable(1205, 'value', 1), { value: 1205 });
+        assert.deepStrictEqual(convertVariable(1205, 'value.temperature', 1), { value: 20.5, unit: '°C' });
+        assert.deepStrictEqual(convertVariable(500, 'value.brightness', 5), {
+            value: Math.round(Math.exp(5) * 10) / 10,
+            unit: 'lux',
+        });
+        assert.deepStrictEqual(convertVariable(4000, 'value.voltage', 6), { value: 10, unit: 'V' });
+        assert.deepStrictEqual(convertVariable(1050, 'value.current', 7), { value: 5, unit: 'A' });
+        assert.deepStrictEqual(convertVariable(2800, 'value.sun.azimuth', 8), { value: 180, unit: '°' });
+        assert.deepStrictEqual(convertVariable(1450, 'value.sun.elevation', 9), { value: 45, unit: '°' });
     });
 });
 
