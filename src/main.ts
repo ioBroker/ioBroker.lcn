@@ -316,8 +316,9 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         switch (obj.command) {
             case 'scanOne':
             case 'scan': {
-                const message = obj.message as { max?: string } | undefined;
-                this.scanRange(String(message?.max ?? ''))
+                // segment: 0 = own segment, otherwise the ID of the segment (since 4.0.0)
+                const message = obj.message as { max?: string; segment?: number | string } | undefined;
+                this.scanRange(String(message?.max ?? ''), parseInt(String(message?.segment ?? 0), 10) || 0)
                     .then(info => obj.callback && this.sendTo(obj.from, obj.command, info, obj.callback))
                     .catch(error => {
                         this.log.error(`Cannot scan: ${error}`);
@@ -1403,7 +1404,14 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
         return !!this.lcn?.isConnected();
     }
 
-    public async scanRange(range: string, onProgress?: (progress: ScanProgress) => void): Promise<ScanResultInfo> {
+    public async scanRange(
+        range: string,
+        segment: number,
+        onProgress?: (progress: ScanProgress) => void,
+    ): Promise<ScanResultInfo> {
+        if (!Number.isInteger(segment) || segment < 0 || segment > 255) {
+            throw new Error(`Invalid segment ${segment}`);
+        }
         const parts = range.split('-');
         let min: number;
         let max: number;
@@ -1417,9 +1425,9 @@ export class LcnAdapter extends utils.Adapter implements LcnAdapterApi {
 
         this.scanListener = onProgress || null;
         try {
-            const found = await this.lcnConnection.scanSegment(min, max);
+            const found = await this.lcnConnection.scanSegment(min, max, segment);
             const info = await this.processFoundDevices(found);
-            this.log.info(`Found total ${info.total} modules. New ${info._new}`);
+            this.log.info(`Found total ${info.total} modules in segment ${segment}. New ${info._new}`);
             return info;
         } finally {
             this.scanListener = null;
