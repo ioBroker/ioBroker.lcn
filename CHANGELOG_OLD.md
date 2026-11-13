@@ -1,4 +1,11 @@
 # Older changes
+## 3.0.2 (2026-11-03)
+- (copilot) Adapter requires node.js >= 22.19.0 now
+- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+- (bluefox) Fixed parsing of logic operation (SUM) status messages. Invalid objects like `SUMS.SUMSUM1000_undefined` were created, and the adapter ran into an endless loop with high CPU load. The invalid objects are deleted on start. New states are `SUMS.SUM01`...`SUMS.SUM04`.
+- (bluefox) Migrated the GitHub workflow to the ioBroker testing actions with npm trusted publishing
+- (bluefox) Removed unused dependency `jsonwebtoken` and modernized the code
+
 ## 3.0.1 (2025-03-24)
 * (bluefox) License was changed to MIT. The adapter is now free of charge.
 

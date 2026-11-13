@@ -27,8 +27,21 @@
       "uk": "LCN - Local Control Network",
       "zh-cn": "LCN - Local Control Network"
     },
-    "version": "4.0.0-beta.3",
+    "version": "4.0.0",
     "news": {
+      "4.0.0": {
+        "en": "Added concurrency configuration to the test-and-release workflow to cancel outdated runs (#118)\nFixed repochecker warnings: size attributes in the configuration, Sentry notice, dependabot cooldown (#132)",
+        "de": "Parallelität zum Test-und-Release-Workflow hinzugefügt, um veraltete Läufe abzubrechen (#118)\nRepochecker-Warnungen behoben: Größenattribute in der Konfiguration, Sentry Notice, je nach Abklingzeit (#132)",
+        "ru": "Добавлена конфигурация параллелизма в рабочий процесс тестирования и выпуска для отмены устаревших запусков (#118)\nИсправлены предупреждения repochecker: атрибуты размера в конфигурации, уведомление Sentry, время восстановления dependabot (#132)",
+        "pt": "Adicionou a simultaneidade ao fluxo de teste e lançamento para cancelar execuções antigas (#118)\nAvisos corrigidos do repochecker: tamanho na configuração, aviso do Sentry, dependabot cooldown (#132)",
+        "nl": "Concurrency-configuratie toegevoegd aan de test-and-release-workflow om verouderde runs te annuleren (#118)\nRepochecker-waarschuwingen opgelost: groottekarakteristieken in de configuratie, Sentry-bericht, afkoelperiode van de afhankelijke bot (#132)",
+        "fr": "Ajout d'une configuration simultanée au flux de test et de sortie pour annuler les exécutions obsolètes (#118)\nAvertissements fixes : attributs de taille dans la configuration, alerte Sentry, temps de recharge (#132)",
+        "it": "Aggiunta la concorrenza al workflow di test e rilascio per annullare esecuzioni obsolete (#118)\nAvvisi repochecker fissi: attributi size nella configurazione, Sentry notice, dependabot cooldown (#132)",
+        "es": "Se añadió una configuración de simultaneidad al flujo de prueba y lanzamiento para cancelar ejecuciones anticuadas (#118)\nAvisos de repochecker fijos: atributos de tamaño en la configuración, aviso de centinela, tiempo de reutilización del dependabot (#132)",
+        "pl": "Dodano konfigurację współbieżności do przepływu pracy testowej i wydania, aby anulować nieaktualne uruchomienia (#118)\nNaprawiono ostrzeżenia repochecker: atrybuty rozmiaru w konfiguracji, powiadomienie Sentry, czas odnowienia zależnego (#132)",
+        "uk": "Додана конфігурація паралельності до робочого процесу тестування та випуску для скасування застарілих запусків (#118)\nВиправлені попередження про перевірку: атрибути розміру в конфігурації, повідомлення Sentry, залежне зарядка (#132)",
+        "zh-cn": "在测试和发布工作流程中添加了并发配置，以取消过时的运行 (#118)\n修复了 repochecker 警告：配置中的大小属性、步哨通知、dependabot 冷却时间 (#132)"
+      },
       "4.0.0-beta.3": {
         "en": "Fixed: `VAR02` and `VAR03` were converted twice, if a role like `value.temperature` was set. Without such a role they are still shown in °C\nFixed: the scan wrote the values of the variables without the conversion of their role\nThe value of a variable is read again from the module, when its role is changed",
         "de": "Behoben: VAR02 und VAR03 wurden zweimal konvertiert, wenn Rollen wie Wert gesetzt waren. Ohne diese Rolle sind sie immer noch in °C\nBehoben: Der Scan schrieb die Variablenwerte ohne Umwandlung ihrer Rolle\nDer Wert einer Variablen wird bei Rollenwechsel erneut aus dem Modul gelesen",
@@ -106,19 +119,6 @@
         "pl": "Prawo jazdy zostało zmienione na MIT. Adapter jest teraz bezpłatny.",
         "uk": "Ліцензія змінено до МІТ. Перехідник тепер безкоштовно.",
         "zh-cn": "执照被改为麻省理工学院。 适配器现在免费."
-      },
-      "2.0.3": {
-        "en": "Added translations",
-        "de": "Übersetzungen hinzugefügt",
-        "ru": "Добавленные переводы",
-        "pt": "Adicionadas traduções",
-        "nl": "Toegevoegde vertalingen",
-        "fr": "Traductions ajoutées",
-        "it": "Traduzioni aggiuntive",
-        "es": "Traducciones adicionales",
-        "pl": "Dodano tłumaczenia",
-        "uk": "Додано переклади",
-        "zh-cn": "添加翻译"
       }
     },
     "platform": "Javascript/Node.js",

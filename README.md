@@ -114,7 +114,7 @@ Every found module has the following actions:
 	### **WORK IN PROGRESS**
 -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0 (2026-11-13)
 * (GermanBluefox) Added concurrency configuration to the test-and-release workflow to cancel outdated runs (#118)
 * (GermanBluefox) Fixed repochecker warnings: size attributes in the configuration, Sentry notice, dependabot cooldown (#132)
 
@@ -142,13 +142,6 @@ Every found module has the following actions:
 - (bluefox) Fixed: a failed authentication on LCN-PCHK was not recognized
 - (bluefox) Fixed: regulator states of scanned modules were recreated on every change of the device object
 - (bluefox) Fixed: writing a state, whose object cannot be read, could crash the adapter
-
-### 3.0.2 (2026-11-03)
-- (copilot) Adapter requires node.js >= 22.19.0 now
-- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
-- (bluefox) Fixed parsing of logic operation (SUM) status messages. Invalid objects like `SUMS.SUMSUM1000_undefined` were created, and the adapter ran into an endless loop with high CPU load. The invalid objects are deleted on start. New states are `SUMS.SUM01`...`SUMS.SUM04`.
-- (bluefox) Migrated the GitHub workflow to the ioBroker testing actions with npm trusted publishing
-- (bluefox) Removed unused dependency `jsonwebtoken` and modernized the code
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
