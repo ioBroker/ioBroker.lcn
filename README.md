@@ -6,6 +6,8 @@
 
 [![NPM](https://nodei.co/npm/iobroker.lcn.png?downloads=true)](https://nodei.co/npm/iobroker.lcn/)
 
+**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
+
 This adapter allows to connect Local Control Network [LCN](https://www.lcn.eu/) to ioBroker.
 
 ## Supported Gateways
@@ -114,6 +116,7 @@ Every found module has the following actions:
 ## Changelog
 ### **WORK IN PROGRESS**
 * (GermanBluefox) Added concurrency configuration to the test-and-release workflow to cancel outdated runs (#118)
+* (GermanBluefox) Fixed repochecker warnings: size attributes in the configuration, Sentry notice, dependabot cooldown (#132)
 
 ### 4.0.0-beta.3 (2026-11-03)
 - (bluefox) Fixed: `VAR02` and `VAR03` were converted twice, if a role like `value.temperature` was set. Without such a role they are still shown in °C
@@ -152,7 +155,7 @@ Every found module has the following actions:
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2018-2024 Denis Haev <dogafox@gmail.com> Private License
+Copyright (c) 2018-2024 Denis Haev <dogafox@gmail.com> Private License  
 Copyright (c) 2025-2026 Denis Haev <dogafox@gmail.com> MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

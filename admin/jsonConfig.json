@@ -12,7 +12,8 @@
                     "xs": 12,
                     "sm": 8,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "port": {
                     "type": "number",
@@ -22,7 +23,8 @@
                     "xs": 12,
                     "sm": 4,
                     "md": 3,
-                    "lg": 2
+                    "lg": 2,
+                    "xl": 2
                 },
                 "analogMode": {
                     "type": "select",
@@ -37,7 +39,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "combinedRelays": {
                     "type": "checkbox",
@@ -46,7 +49,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "user": {
                     "type": "text",
@@ -55,7 +59,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "password": {
                     "type": "password",
@@ -65,7 +70,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 12,
-                    "lg": 8
+                    "lg": 8,
+                    "xl": 8
                 }
             }
         },
@@ -79,7 +85,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "readAtStart": {
                     "type": "checkbox",
@@ -87,7 +94,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "reconnectTimeout": {
                     "type": "number",
@@ -97,7 +105,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "connectTimeout": {
                     "type": "number",
@@ -106,7 +115,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultTimeout": {
                     "type": "number",
@@ -115,7 +125,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "pingInterval": {
                     "type": "number",
@@ -125,7 +136,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "pingTimeout": {
                     "type": "number",
@@ -134,7 +146,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "scanResponseTimeout": {
                     "type": "number",
@@ -143,7 +156,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "varPollInterval": {
                     "type": "number",
@@ -154,7 +168,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 }
             }
         },
@@ -165,12 +180,20 @@
                 "_info": {
                     "type": "staticText",
                     "text": "The modules are scanned and configured in the device manager below.",
-                    "xs": 12
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
                 },
                 "_dm": {
                     "type": "deviceManager",
                     "newLine": true,
                     "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
                     "style": {
                         "width": "100%",
                         "height": "100%",
